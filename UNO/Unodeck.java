@@ -31,9 +31,11 @@ public class Unodeck {
 
 	//==================================================================================
 
-	public void pushCard(Unocard c) {
+	public boolean pushCard(Unocard c) {
 		deck[deckSize + 1] = c;
 		deckSize++;
+
+		return true;
 	}
 
 	//==================================================================================
