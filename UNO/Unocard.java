@@ -10,7 +10,7 @@ import java.util.Random;
 
 public class Unocard {
 
-	private String color; // color of the card
+    private String color; // color of the card
     private int value; // value of the card
     private Random randomNum;
     private String action; // action of the card
@@ -18,9 +18,9 @@ public class Unocard {
 
     // General Constructor
     public Unocard() {
-    	color = "black";
-    	value = -1;
-    	action = "default";
+        color = "black";
+        value = -1;
+        action = "default";
     }
 
 
@@ -29,43 +29,45 @@ public class Unocard {
     // Setters and Getters
 
     public String getAction() {
-    	return action;
+        return action;
     }
 
     public void setAction(String pAction) {
-    	action = pAction;
+        action = pAction;
     }
 
     public int getValue() {
-    	return value;
+        return value;
     }
 
     public void setValue(int pValue) {
-    	value = pValue;
+        value = pValue;
     }
 
     public String getColor() {
-    	return color;
+        return color;
     }
 
     public void setColor(String pColor) {
-    	color = pColor;
+        color = pColor;
     }
 
     public String toString() {
-    	if (value < 6) {
-    		return color + "," + value;
-    	} else {
-    		return color + "," + action;
-    	}
+        if (value < 6) {
+            return color + "," + value;
+        } else {
+            return color + "," + action;
+        }
     }
 
     public void displayCard() {
-		System.out.print(getColor());
-		if(getValue()>5)System.out.println(","+getAction());
-		else
-		System.out.println(","+getValue());
-	}
+        System.out.print(getColor());
+        if (getValue() > 5) {
+            System.out.println("," + getAction());
+        } else {
+            System.out.println("," + getValue());
+        }
+    }
 
 } // End UnoCard Class
 //===================================================================

@@ -10,12 +10,11 @@ import static org.junit.Assert.*;
 public class PlayerTest {
 
     private Player player;
-    private Unodeck deck;
 
     @Before
     public void setUp() {
 
-        deck = new Unodeck();
+        Unodeck deck = new Unodeck();
         deck.fillDeck();
         deck.shuffleDeck();
         player = new Player(deck);
@@ -32,9 +31,9 @@ public class PlayerTest {
     @Test
     public void testCreation() {
 
-        assertTrue(Player.playerNum == 1);
-        assertTrue(player.getName().equals("Player1"));
-        assertTrue(player.getHandSize() == 5);
+        assertEquals(1, Player.playerNum);
+        assertEquals("Player1", player.getName());
+        assertEquals(5, player.getHandSize());
 
     }
 
@@ -46,22 +45,23 @@ public class PlayerTest {
 
     @Test
     public void testGetCardsInHand() {
-        assertTrue(player.getCardsInHand().length == 5);
-        assertTrue(player.getCardsInHand() != null);
+        assertEquals(5, player.getCardsInHand().length);
+        assertNotNull(player.getCardsInHand());
     }
 
     @Test
     public void testSendCardsInHand() {
         String[] cards = {"blue,1", "red,3", "yellow,reverse"};
 
-        assertTrue(player.sendCardsInHand(cards).equals("blue,1:red,3:yellow,reverse:"));
+        assertEquals("blue,1:red,3:yellow,reverse:", player.sendCardsInHand
+            (cards));
     }
 
     @Test
     public void testUpdateHandAfterPlay() {
         player.updateHandAfterPlay(0);
 
-        assertTrue(player.getHandSize() == 4);
+        assertEquals(4, player.getHandSize());
 
     }
 
@@ -71,8 +71,8 @@ public class PlayerTest {
 
         player.updateHandAfterDraw(card);
 
-        assertTrue(player.getHandSize() == 6);
-        assertTrue(player.getCardsInHand()[5].equals("black,-1"));
+        assertEquals(6, player.getHandSize());
+        assertEquals("black,-1", player.getCardsInHand()[5]);
     }
 
     @Test

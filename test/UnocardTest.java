@@ -39,7 +39,7 @@ public class UnocardTest {
     @Test
     public void testToStringNumberCard() {
 
-        assertTrue(card.toString().equals("black,-1"));
+        assertEquals("black,-1", card.toString());
     }
 
     @Test
@@ -48,16 +48,13 @@ public class UnocardTest {
         card.setValue(6);
         card.setColor("blue");
 
-        assertTrue(card.toString().equals("blue,reverse"));
+        assertEquals("blue,reverse", card.toString());
     }
 
     @Test
     public void testDisplayCard() {
         card.displayCard();
     }
-
-
-
 
 
 }
