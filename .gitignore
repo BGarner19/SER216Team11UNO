@@ -34,3 +34,5 @@ hs_err_pid*
 .loadpath
 
 
+out/
+.project
