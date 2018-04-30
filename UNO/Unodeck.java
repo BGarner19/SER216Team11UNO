@@ -18,7 +18,12 @@ public class Unodeck {
     //==================================================================================
 
     public Unocard peekCard() {
-        return deck[deckSize]; // deckSize - 1
+
+        if (deckSize == 0) {
+            return null;
+        }
+
+        return deck[deckSize - 1]; // deckSize - 1
     }
 
     //==================================================================================
