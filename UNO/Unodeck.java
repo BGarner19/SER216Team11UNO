@@ -36,8 +36,15 @@ public class Unodeck {
     //==================================================================================
 
     public boolean pushCard(Unocard c) {
-        deck[deckSize + 1] = c;
+
+        if (deckSize == 74) {
+            return false;
+        }
+
+        deck[deckSize] = c;
+
         deckSize++;
+
 
         return true;
     }
