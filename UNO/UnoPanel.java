@@ -141,10 +141,10 @@ public class UnoPanel extends JFrame implements UnoConstants, Runnable {
         gameBoardPanel.add(otherPlayerName);
 
         // other player hand size
-        otherPlayerhandSize = new JLabel("handSize");
-        otherPlayerhandSize.setForeground(Color.WHITE);
-        otherPlayerhandSize.setBounds(451, 102, 61, 16);
-        gameBoardPanel.add(otherPlayerhandSize);
+       	otherPlayerhandSize = new JLabel("0");
+		otherPlayerhandSize.setForeground(Color.WHITE);
+		otherPlayerhandSize.setBounds(451, 102, 61, 16);
+		GameBoardPanel.add(otherPlayerhandSize);
 
         // Buttons ===================================================
         btnGame = new JButton("Game");
@@ -187,12 +187,16 @@ public class UnoPanel extends JFrame implements UnoConstants, Runnable {
         gameMenuPanel.setVisible(true);
 
         // Slider =========================================
-        slider = new JSlider();
-        slider.setMinimum(0);
-        slider.setMaximum(4);
-        slider.setValue(2);
-        slider.setBounds(449, 489, 190, 29);
-        gameBoardPanel.add(slider);
+            slider = new JSlider();
+			slider.setMajorTickSpacing(0);	
+			slider.setMinorTickSpacing(4); 
+			slider.setPaintLabels(true);
+			slider.setPaintTicks(true);
+			slider.setMinimum(0);
+			slider.setMaximum(4);
+			slider.setValue(2);
+			slider.setBounds(449, 489, 190, 29);
+			GameBoardPanel.add(slider);
 
         topDiscard = new JLabel("");
         topDiscard.setBounds(109, 249, 165, 245);
@@ -433,38 +437,31 @@ public class UnoPanel extends JFrame implements UnoConstants, Runnable {
 
         //------------------------------------------------------------------------------------
 
-        slider.addChangeListener(new ChangeListener() {
-            @Override
-            public void stateChanged(ChangeEvent e) {
-                // should return the card in the hand @ that pos
-                String[] cardsInHand = playersHand.split(":");
-                currentSelectedCard = cardsInHand[slider.getValue()];
+	slider.addChangeListener(new ChangeListener() 
+		{
+			public void stateChanged(ChangeEvent e) 
+			{
+				try
+				{
+					String[] cardsInHand = playersHand.split(":"); 
+					currentSelectedCard = cardsInHand[slider.getValue()]; 
+					BufferedImage selectedCardImage = null; 	
+					selectedCardImage = ImageIO.read(this.getClass().getResourceAsStream("/gameCards/"+currentSelectedCard + ".jpg"));
+					
+					Image theResizedCardImageForSelectedCard = selectedCardImage.getScaledInstance( selectedCardLabel.getWidth(), selectedCardLabel.getHeight(), Image.SCALE_DEFAULT);
+					ImageIcon theSelectedCardIcon = new ImageIcon(theResizedCardImageForSelectedCard); 
+					selectedCardLabel.setIcon(theSelectedCardIcon);
+					
+				}
+				catch(Exception io)
+				{
+					System.out.print("WAITING FOR OTHER PLAYERS!!\n");
 
-                // print the current selected card
-                System.out.println(currentSelectedCard);
+				}
 
-                BufferedImage selectedCardImage = null;
-
-                try {
-
-                    selectedCardImage = ImageIO.read(this.getClass()
-                        .getResourceAsStream("/gameCards/" + currentSelectedCard + ".jpg"));
-
-                } catch (IOException e1) {
-                    System.out.println(e1.getMessage());
-                }
-
-                Image theResizedCardImageForSelectedCard =
-                    selectedCardImage.getScaledInstance(selectedCardLabel
-                            .getWidth(), selectedCardLabel
-                            .getHeight(),
-                        Image.SCALE_DEFAULT);
-
-                ImageIcon theSelectedCardIcon = new ImageIcon(theResizedCardImageForSelectedCard);
-
-                selectedCardLabel.setIcon(theSelectedCardIcon);
-            }
-        });
+			}
+		});
+		
 
 
     }
