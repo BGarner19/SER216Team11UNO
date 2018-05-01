@@ -183,9 +183,13 @@ public class HandleASession implements Runnable, UnoConstants {
             toPlayer.flush();
 
 
+            checkAction(player, opponent, indexReceived, drawDeck, toOpponent, toOpponent);
+            
+            //Player player, Player opponent, int index,Unodeck d, DataOutputStream toOpponent, DataOutputStream toPlayer
+            
             // draw 2 cards
-            opponent.updateHandAfterDraw(drawDeck.popCard());
-            opponent.updateHandAfterDraw(drawDeck.popCard());
+            //opponent.updateHandAfterDraw(drawDeck.popCard());
+            //opponent.updateHandAfterDraw(drawDeck.popCard());
 
             // send the hands size
             toPlayer.writeInt(opponent.getHandSize());
