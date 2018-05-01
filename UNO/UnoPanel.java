@@ -1,1094 +1,1055 @@
-import java.awt.Color;
+
+import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.awt.Image;
-import java.awt.event.ActionEvent;
+
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JSlider;
+import javax.swing.border.EmptyBorder;
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
+import java.awt.event.ActionEvent;
+import java.awt.Color;
+import javax.swing.JLayeredPane;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JSlider;
+import javax.swing.JTextField;
 import javax.swing.UIManager;
-import javax.swing.border.EmptyBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
+import javax.swing.JTextPane;
+import javax.swing.SwingConstants;
 
 public class UnoPanel extends JFrame implements UnoConstants, Runnable {
 
-    // Instantiate game variables
-    public int handSize = 5;
-    int player;
+	// Instantiate game variables
+		public int handSize = 5;
+		int player;
 
-    // while playing variables
-    static boolean myTurn = false;
-    boolean waiting = true;
-    String currentSelectedCard; // should be in the form (color,value)
-    boolean continueToPlay = true;
-    boolean isValidPlay = false;
-    Thread thread;
-    public String colorChosen;
-    public String wildCardColor;
+		// while playing variables
+		static boolean myTurn = false;
+		boolean waiting = true;
+		String currentSelectedCard; // should be in the form (color,value)
+		boolean continueToPlay = true;
+		boolean isValidPlay = false;
+		Thread thread;
+		public String colorChosen;
+		public String wildCardColor;
 
-    // Private
-    private DataOutputStream toServer;
-    private DataInputStream fromServer;
-    private String host = "localhost";
-    private int port = 8000;
-
-
-    // Jframe
-    private JPanel contentPane;
+		// Private
+		private DataOutputStream toServer;
+		private DataInputStream fromServer;
+		private String host = "localhost";
+		private int port = 8000;
 
 
-    // Runtime variables
-    // Initiation variables
-    String opponentName;
-    int opponentCardCount;
-    String topDiscardCard;
-    String playersHand;
-    static boolean gameStarted = false;
-    private int status;
-    private int checkStatus;
-
-    /**
-     * had to make all these up here to manipulate in the functions.
-     */
-    // panels
-    JPanel gameBoardPanel;
-    JPanel gameMenuPanel;
-    JPanel helpPanel;
-    JLabel otherPlayerName;
-    JLabel topDiscard;
-    JLabel gameMenuLabel;
-    JLabel otherPlayerhandSize;
-
-    // buttons
-    JButton btnGame;
-    JButton btnHelp;
-    JButton btnExit;
-    JButton drawButton;
-    JButton connect;
-    JButton play;
-    JButton btnPlaythiscard;
-
-    // slider
-    JSlider slider;
-
-    // Labels
-    JLabel leftCard;
-    JLabel rightCard;
-    JLabel selectedCardLabel;
-
-    // Start of Main ===============================================
-    public static void main(String[] args) {
-        EventQueue.invokeLater(new Runnable() {
-            public void run() { // Start of run ====================
-                try {
-                    UnoPanel frame = new UnoPanel();
-                    frame.setVisible(true);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            } // End of run ========================================
-        });
-    } // End of main ===============================================
+		// Jframe
+		private JPanel contentPane;
 
 
-    public UnoPanel() {
-        init();
-    }
+		// Runtime variables
+		// Initiation variables
+		String opponentName;
+		int opponentCardCount;
+		String topDiscardCard;
+		String playersHand;
+		static boolean gameStarted = false;
+		private int status;
+		private int checkStatus;
 
-    // Create the frame ============================================
-    public void init() {
+		/** had to make all these up here to manipulate in the functions */
+		// panels
+		JPanel GameBoardPanel;
+		JPanel GameMenuPanel;
+		JPanel HelpPanel;
+		JLabel otherPlayerName;
+		JLabel topDiscard;
+		JLabel GameMenuLabel;
+		JLabel otherPlayerhandSize;
 
-        // Creates main window
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setBounds(100, 100, 1066, 618);
-        contentPane = new JPanel();
-        contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-        setContentPane(contentPane);
-        contentPane.setLayout(null);
+		// buttons
+		JButton btnGame;
+		JButton btnHelp;
+		JButton btnExit;
+		JButton drawButton;
+		JButton connect;
+		JButton play;
+		JButton btnPlaythiscard;
 
-        // Panels ====================================================
+		// slider
+		JSlider slider;
 
-        gameBoardPanel = new JPanel();
-        gameBoardPanel.setBackground(Color.LIGHT_GRAY);
-        gameBoardPanel.setBounds(0, 0, 1066, 618);
-        contentPane.add(gameBoardPanel);
-        gameBoardPanel.setLayout(null);
+		// Labels
+		JLabel leftCard;
+		JLabel rightCard;
+		JLabel selectedCardLabel;
 
-        gameMenuPanel = new JPanel();
-        gameMenuPanel.setBackground(new Color(0, 255, 0));
-        gameMenuPanel.setForeground(new Color(0, 255, 0));
-        gameMenuPanel.setBounds(0, 0, 1066, 618);
-        contentPane.add(gameMenuPanel);
-        gameMenuPanel.setLayout(null);
+		// Start of Main ===============================================
+		public static void main(String[] args){
+			EventQueue.invokeLater(new Runnable() {
+				public void run() { // Start of run ====================
+					try {
+						UnoPanel frame = new UnoPanel();
+						frame.setVisible(true);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				} // End of run ========================================
+			});
+		} // End of main ===============================================
 
-        otherPlayerName = new JLabel("No player has joined...");
-        otherPlayerName.setForeground(Color.WHITE);
-        otherPlayerName.setIcon(new ImageIcon(
-            this.getClass().getResource("/UI/rsz_user.png")));
-        otherPlayerName.setBounds(419, 6, 201, 131);
-        gameBoardPanel.add(otherPlayerName);
 
-        // other player hand size
-       	otherPlayerhandSize = new JLabel("0");
+	public UnoPanel() {
+		Init();
+	}
+
+	// Create the frame ============================================
+	public void Init() {
+
+		// Creates main window
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setBounds(100, 100, 1066, 618);
+		contentPane = new JPanel();
+		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+		setContentPane(contentPane);
+		contentPane.setLayout(null);
+
+		// Panels ====================================================
+
+		GameBoardPanel = new JPanel();
+		GameBoardPanel.setBackground(Color.LIGHT_GRAY);
+		GameBoardPanel.setBounds(0, 0, 1066, 618);
+		contentPane.add(GameBoardPanel);
+		GameBoardPanel.setLayout(null);
+
+		GameMenuPanel = new JPanel();
+		GameMenuPanel.setBackground(new Color(0, 255, 0));
+		GameMenuPanel.setForeground(new Color(0, 255, 0));
+		GameMenuPanel.setBounds(0, 0, 1066, 618);
+		contentPane.add(GameMenuPanel);
+		GameMenuPanel.setLayout(null);
+
+		otherPlayerName = new JLabel("No player has joined...");
+		otherPlayerName.setForeground(Color.WHITE);
+		otherPlayerName.setIcon(new ImageIcon(this.getClass().getResource("/UI/rsz_user.png")));
+		otherPlayerName.setBounds(419, 6, 201, 131);
+		GameBoardPanel.add(otherPlayerName);
+
+		// other player hand size
+		otherPlayerhandSize = new JLabel("handSize");
 		otherPlayerhandSize.setForeground(Color.WHITE);
 		otherPlayerhandSize.setBounds(451, 102, 61, 16);
-		gameBoardPanel.add(otherPlayerhandSize);
-
-        // Buttons ===================================================
-        btnGame = new JButton("Game");
-
-        // Main Screen Help
-        btnHelp = new JButton("Help");
-        btnHelp.setBounds(0, 47, 64, 38);
-        contentPane.add(btnHelp);
-
-        // Main Screen Exit
-        btnExit = new JButton("Exit");
-        btnExit.setBounds(0, 90, 64, 38);
-        contentPane.add(btnExit);
-
-        // Game button
-        btnGame.setBounds(0, 6, 64, 38);
-        contentPane.add(btnGame);
-
-        drawButton = new JButton("Draw");
-        drawButton.setForeground(UIManager.getColor("Button.light"));
-        drawButton.setBackground(UIManager.getColor("Button.light"));
-        drawButton.setBounds(799, 249, 165, 245);
-        gameBoardPanel.add(drawButton);
-
-        connect = new JButton("Find a game");
-        connect.setBounds(389, 342, 287, 82);
-
-        play = new JButton("Play Game");
-        play.setBounds(389, 342, 287, 82);
-
-        // play this card button
-        btnPlaythiscard = new JButton("PlayThisCard");
-        btnPlaythiscard.setBounds(490, 530, 117, 29);
-        gameBoardPanel.add(btnPlaythiscard);
-
-        gameBoardPanel.setVisible(false);
-        // Add play button to gameMenuPanel
-        // gameMenuPanel.add(connect); // may take off
-        gameMenuPanel.add(play);
-        gameMenuPanel.setVisible(true);
-
-        // Slider =========================================
-            slider = new JSlider();
-			slider.setMajorTickSpacing(0);	
-			slider.setMinorTickSpacing(4); 
-			slider.setPaintLabels(true);
-			slider.setPaintTicks(true);
-			slider.setMinimum(0);
-			slider.setMaximum(4);
-			slider.setValue(2);
-			slider.setBounds(449, 489, 190, 29);
-			gameBoardPanel.add(slider);
-
-        topDiscard = new JLabel("");
-        topDiscard.setBounds(109, 249, 165, 245);
-        gameBoardPanel.add(topDiscard);
-
-        // Cards In Hand ======================================
-        selectedCardLabel = new JLabel("");
-        selectedCardLabel.setBounds(490, 249, 117, 190);
-        gameBoardPanel.add(selectedCardLabel);
-
-        leftCard = new JLabel("");
-        leftCard.setBounds(395, 275, 117, 190);
-        gameBoardPanel.add(leftCard);
-
-        rightCard = new JLabel("");
-        rightCard.setBounds(585, 275, 117, 190);
-        gameBoardPanel.add(rightCard);
-
-        helpPanel = new JPanel();
-        helpPanel.setForeground(Color.GREEN);
-        helpPanel.setBackground(new Color(255, 69, 0));
-        helpPanel.setBounds(0, 0, 1066, 618);
-        contentPane.add(helpPanel);
-        helpPanel.setVisible(false);
-
-        //  =========       GAME HELP SCREEN BACKGROUND =========
-        helpPanel.setOpaque(false);
-        JLabel helpBackground = new JLabel(new ImageIcon(this.getClass()
-            .getResource("/gameCards/HelpMenu.jpg")));
-        helpBackground.setBounds(0, 0, 1166, 596);
-        helpPanel.add(helpBackground);
-
-        // ================================================== GUI BACKGROUNDS
-        // AND PICS ====================================
-
-        //	=========       GAME BACKGROUND    =================
-        JLabel gameBackground = new JLabel(new ImageIcon(this.getClass()
-            .getResource("/gameCards/Background.jpg")));
-        gameBackground.setBounds(0, 0, 1166, 596);
-        contentPane.add(gameBackground);
-
-        //  ==========       MENU BACKFROUND    =================
-        gameMenuPanel.setOpaque(false);
-        JLabel menuBackground = new JLabel(new ImageIcon(this.getClass()
-            .getResource("/gameCards/GameMenu.jpg")));
-        menuBackground.setBounds(0, 0, 1166, 596);
-        gameMenuPanel.add(menuBackground);
-
-        //  =========       GAME SCREEN CLEAR BACKGROUND ========
-        gameBoardPanel.setOpaque(false);
+		GameBoardPanel.add(otherPlayerhandSize);
+
+		// Buttons ===================================================
+		btnGame = new JButton("Game");
+
+		// Main Screen Help
+		btnHelp = new JButton("Help");
+		btnHelp.setBounds(0, 47, 64, 38);
+		contentPane.add(btnHelp);
+
+	    // Main Screen Exit
+		btnExit = new JButton("Exit");
+		btnExit.setBounds(0, 90, 64, 38);
+		contentPane.add(btnExit);
 
-        //  =========        RIGHT & LEFT CARDS _ FACEDOWN ======
+		// Game button
+		btnGame.setBounds(0, 6, 64, 38);
+		contentPane.add(btnGame);
 
-        BufferedImage flippedCardImage = null;
+		drawButton = new JButton("Draw");
+		drawButton.setForeground(UIManager.getColor("Button.light"));
+		drawButton.setBackground(UIManager.getColor("Button.light"));
+		drawButton.setBounds(799, 249, 165, 245);
+		GameBoardPanel.add(drawButton);
 
-        try {
+		connect = new JButton("Find a game");
+		connect.setBounds(389, 342, 287, 82);
 
-            flippedCardImage = ImageIO.read(this.getClass()
-                .getResourceAsStream("/gameCards/FaceDown.png"));
+		play = new JButton("Play Game");
+		play.setBounds(389, 342, 287, 82);
 
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
-        }
+		// play this card button
+		btnPlaythiscard = new JButton("PlayThisCard");
+		btnPlaythiscard.setBounds(490, 530, 117, 29);
+		GameBoardPanel.add(btnPlaythiscard);
 
-        Image theResizedCardImageForFlippedCards =
-            flippedCardImage.getScaledInstance(selectedCardLabel.getWidth(),
-                selectedCardLabel.getHeight(), Image.SCALE_DEFAULT);
+		GameBoardPanel.setVisible(false);
+		// Add play button to GameMenuPanel
+		// GameMenuPanel.add(connect); // may take off
+		GameMenuPanel.add(play);
+		GameMenuPanel.setVisible(true);
 
-        ImageIcon theFlippedCardIcon = new ImageIcon(theResizedCardImageForFlippedCards);
+		// Slider =========================================
+		slider = new JSlider();
+		slider.setMinimum(0);
+		slider.setMaximum(4);
+		slider.setValue(2);
+		slider.setBounds(449, 489, 190, 29);
+		GameBoardPanel.add(slider);
 
-        leftCard.setIcon(theFlippedCardIcon);
+		topDiscard = new JLabel("");
+		topDiscard.setBounds(109, 249, 165, 245);
+		GameBoardPanel.add(topDiscard);
+
+		// Cards In Hand ======================================
+		selectedCardLabel = new JLabel("");
+		selectedCardLabel.setBounds(490, 249, 117, 190);
+		GameBoardPanel.add(selectedCardLabel);
+
+		leftCard = new JLabel("");
+		leftCard.setBounds(395, 275, 117, 190);
+		GameBoardPanel.add(leftCard);
 
-        rightCard.setIcon(theFlippedCardIcon);
+		rightCard = new JLabel("");
+		rightCard.setBounds(585, 275, 117, 190);
+		GameBoardPanel.add(rightCard);
 
-        //  =========    DRAW BUTTON ==================
-        drawButton.setOpaque(false);
-        Image theResizedCardImageForDrawButton =
-            flippedCardImage.getScaledInstance(drawButton.getWidth(),
-                drawButton.getHeight(), Image.SCALE_DEFAULT);
+		HelpPanel = new JPanel();
+		HelpPanel.setForeground(Color.GREEN);
+		HelpPanel.setBackground(new Color(255, 69, 0));
+		HelpPanel.setBounds(0, 0, 1066, 618);
+		contentPane.add(HelpPanel);
+		HelpPanel.setVisible(false);
 
-        ImageIcon theDrawButtonIcon = new ImageIcon(theResizedCardImageForDrawButton);
+											   //  =========       GAME HELP SCREEN BACKGROUND =========
+		HelpPanel.setOpaque(false);
+		JLabel helpBackground = new JLabel(new ImageIcon(this.getClass().getResource("/gameCards/HelpMenu.jpg")));
+		helpBackground.setBounds(0, 0, 1166, 596);
+		HelpPanel.add(helpBackground);
 
-        drawButton.setIcon(theDrawButtonIcon);
-        //  ==========    MIDDLE CARD INITIAL ICON ========
-        selectedCardLabel.setIcon(theFlippedCardIcon);
-        //  ==========
-        topDiscard.setIcon(theFlippedCardIcon);
+		// ================================================== GUI BACKGROUNDS AND PICS ====================================
 
+												//	=========       GAME BACKGROUND    =================
+		JLabel gameBackground = new JLabel(new ImageIcon(this.getClass().getResource("/gameCards/Background.jpg")));
+		gameBackground.setBounds(0, 0, 1166, 596);
+		contentPane.add(gameBackground);
 
-        // Action Listeners
-        // ============================================================================
+											   //  ==========       MENU BACKFROUND    =================
+		GameMenuPanel.setOpaque(false);
+		JLabel menuBackground = new JLabel(new ImageIcon(this.getClass().getResource("/gameCards/GameMenu.jpg")));
+		menuBackground.setBounds(0, 0, 1166, 596);
+		GameMenuPanel.add(menuBackground);
 
+											   //  =========       GAME SCREEN CLEAR BACKGROUND ========
+		GameBoardPanel.setOpaque(false);
 
-        // Action listener if user wants to exit
-        btnExit.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                // Close dialog code
-                JDialog.setDefaultLookAndFeelDecorated(true);
-                int response = JOptionPane.showConfirmDialog(null, "Are you "
-                        + "sure you want to exit?", "Exit game",
-                    JOptionPane.YES_NO_OPTION, JOptionPane
-                        .QUESTION_MESSAGE);
-                if (response == JOptionPane.NO_OPTION) {
-                    System.out.println("No button clicked");
-                } else if (response == JOptionPane.YES_OPTION) {
-                    System.exit(0);
-                    try {
-                        toServer.writeBoolean(false);
-                        toServer.flush();
-                    } catch (IOException e1) {
-                        e1.printStackTrace();
-                    }
-                } else if (response == JOptionPane.CLOSED_OPTION) {
-                    System.out.println("JOptionPane closed");
-                } // End of close dialog code
-            }
-        });
+										       //  =========        RIGHT & LEFT CARDS _ FACEDOWN ======
 
+		BufferedImage flippedCardImage = null;
 
-        //------------------------------------------------------------------------------------
+		try {
 
+			flippedCardImage = ImageIO.read(this.getClass().getResourceAsStream("/gameCards/FaceDown.png"));
 
-        btnGame.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
+		} catch (IOException e) {
 
-                helpPanel.setVisible(false); //panel_1 is red
+		}
 
-                if (gameStarted) {
-                    gameMenuPanel.setVisible(false);
-                    gameBoardPanel.setVisible(true); // panel_2 is blue
-                } else {
-                    gameMenuPanel.setVisible(true); // panel is green
-                    gameBoardPanel.setVisible(false);
-                }
-            }
-        });
+		Image theResizedCardImageForFlippedCards =
+				flippedCardImage.getScaledInstance(selectedCardLabel.getWidth(), selectedCardLabel.getHeight(),Image.SCALE_DEFAULT);
 
+		ImageIcon theFlippedCardIcon = new ImageIcon(theResizedCardImageForFlippedCards);
 
-        //------------------------------------------------------------------------------------
+		leftCard.setIcon(theFlippedCardIcon);
 
+		rightCard.setIcon(theFlippedCardIcon);
 
-        btnPlaythiscard.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
+		                                   //  =========    DRAW BUTTON ==================
+		drawButton.setOpaque(false);
+		Image theResizedCardImageForDrawButton =
+				flippedCardImage.getScaledInstance(drawButton.getWidth(), drawButton.getHeight(),Image.SCALE_DEFAULT);
 
-                // check to make sure its a valid play
-                validatePlay(currentSelectedCard, topDiscardCard);
+		ImageIcon theDrawButtonIcon = new ImageIcon(theResizedCardImageForDrawButton);
 
-                // client wants to play this card and its valid
-                if (isValidPlay) {
-                    status = PLAYCARD;
-                    waiting = false;
+		drawButton.setIcon(theDrawButtonIcon);
+										 //  ==========    MIDDLE CARD INITIAL ICON ========
+		selectedCardLabel.setIcon(theFlippedCardIcon);
+										 //  ==========
+		topDiscard.setIcon(theFlippedCardIcon);
 
-                } else { // Invalid Card Error dialog
 
-                    String[] e1 = topDiscardCard.split(",");
-                    String eventColor = e1[0];
-                    String eventVal = e1[1];
-                    if (eventVal.equals("wild")) {
-                        JOptionPane.showMessageDialog(null,
-                            "Please play a card that's " + eventColor,
-                            "Invalid Card",
-                            JOptionPane.ERROR_MESSAGE);
-                    } else {
-                        JOptionPane.showMessageDialog(null,
-                            "Please play a card that's either " + eventColor
-                                + " Or is " + eventVal,
-                            "Invalid Card",
-                            JOptionPane.ERROR_MESSAGE);
-                    }
 
-                }
+// Action Listeners ============================================================================
 
-                isValidPlay = false;
-            }
-        });
 
+		// Action listener if user wants to exit
+		btnExit.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				// Close dialog code
+				JDialog.setDefaultLookAndFeelDecorated(true);
+			    int response = JOptionPane.showConfirmDialog(null, "Are you sure you want to exit?", "Exit game",
+			        JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+			    if (response == JOptionPane.NO_OPTION) {
+			      System.out.println("No button clicked");
+			    } else if (response == JOptionPane.YES_OPTION) {
+			    	System.exit(0);
+			    	try {
+			    		toServer.writeBoolean(false);
+			    		toServer.flush();
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					}
+			    } else if (response == JOptionPane.CLOSED_OPTION) {
+			      System.out.println("JOptionPane closed");
+			    } // End of close dialog code
+			}
+		});
 
-        //------------------------------------------------------------------------------------
 
+//------------------------------------------------------------------------------------
 
-        // drawButton will act everytime a card is drawn.
-        drawButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                status = DRAW;
-                waiting = false;
-            }
-        });
 
-        //------------------------------------------------------------------------------------
+		btnGame.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
 
+				HelpPanel.setVisible(false); //panel_1 is red
 
-        // play goes to the panel with the game
-        play.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-
-                // brings up the game panel
-                gameStarted = true;
-                play.setVisible(false);
-                gameMenuPanel.setVisible(false);
-                helpPanel.setVisible(false);
-                gameBoardPanel.setVisible(true);
-
-                connectToServer();
-
-            }
-        });
-
-
-        //------------------------------------------------------------------------------------
-
-        // play goes to the panel with the game -DEPRICATED
-        connect.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-
-                // find a game button disappears, play button appears -GUI-
-                connect.setVisible(false);
-                connect.setEnabled(false);
-                gameMenuPanel.add(play);
-                play.setVisible(true);
-
-            }
-        });
-
-
-        //------------------------------------------------------------------------------------
-
-
-        btnHelp.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                gameMenuPanel.setVisible(false); // panel is green
-                helpPanel.setVisible(true); //panel_1 is red
-                gameBoardPanel.setVisible(false);
-
-            }
-        });
-
-
-        //------------------------------------------------------------------------------------
-
-	slider.addChangeListener(new ChangeListener() 
-		{
-			public void stateChanged(ChangeEvent e) 
-			{
-				try
-				{
-					String[] cardsInHand = playersHand.split(":"); 
-					currentSelectedCard = cardsInHand[slider.getValue()]; 
-					BufferedImage selectedCardImage = null; 	
-					selectedCardImage = ImageIO.read(this.getClass().getResourceAsStream("/gameCards/"+currentSelectedCard + ".jpg"));
-					
-					Image theResizedCardImageForSelectedCard = selectedCardImage.getScaledInstance( selectedCardLabel.getWidth(), selectedCardLabel.getHeight(), Image.SCALE_DEFAULT);
-					ImageIcon theSelectedCardIcon = new ImageIcon(theResizedCardImageForSelectedCard); 
-					selectedCardLabel.setIcon(theSelectedCardIcon);
-					
+				if(gameStarted){
+					GameMenuPanel.setVisible(false);
+					GameBoardPanel.setVisible(true); // panel_2 is blue
+				}else{
+					GameMenuPanel.setVisible(true); // panel is green
+					GameBoardPanel.setVisible(false);
 				}
-				catch(Exception io)
-				{
-					System.out.print("WAITING FOR OTHER PLAYERS!!\n");
+			}
+		});
+
+
+//------------------------------------------------------------------------------------
+
+
+		btnPlaythiscard.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent e) {
+
+				// check to make sure its a valid play
+				validatePlay(currentSelectedCard, topDiscardCard);
+
+				// client wants to play this card and its valid
+				if (isValidPlay) {
+					status = PLAYCARD;
+					waiting = false;
+
+				} else { // Invalid Card Error dialog
+
+					String [] e1 = topDiscardCard.split(",");
+					String eColor = e1[0];
+					String eVal = e1[1];
+					if (eVal.equals("wild")){
+						JOptionPane.showMessageDialog(null,
+						    "Please play a card that's " + eColor,
+						    "Invalid Card",
+						    JOptionPane.ERROR_MESSAGE);
+					} else {
+					JOptionPane.showMessageDialog(null,
+					    "Please play a card that's either " + eColor +" Or is " + eVal,
+					    "Invalid Card",
+					    JOptionPane.ERROR_MESSAGE);
+					}
 
 				}
+
+				isValidPlay = false;
+			}
+		});
+
+
+//------------------------------------------------------------------------------------
+
+
+		// drawButton will act everytime a card is drawn.
+		drawButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				status = DRAW;
+				waiting = false;
+			}
+		});
+
+//------------------------------------------------------------------------------------
+
+
+		// play goes to the panel with the game
+		play.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+
+				// brings up the game panel
+				gameStarted = true;
+				play.setVisible(false);
+				GameMenuPanel.setVisible(false);
+				HelpPanel.setVisible(false);
+				GameBoardPanel.setVisible(true);
+
+				connectToServer();
 
 			}
 		});
+
+
+//------------------------------------------------------------------------------------
+
+		// play goes to the panel with the game -DEPRICATED
+		connect.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e){
+
+			    // find a game button disappears, play button appears -GUI-
+				connect.setVisible(false);
+				connect.setEnabled(false);
+				GameMenuPanel.add(play);
+				play.setVisible(true);
+
+			}
+		});
+
+
+//------------------------------------------------------------------------------------
+
+
+		btnHelp.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e) {
+				GameMenuPanel.setVisible(false); // panel is green
+				HelpPanel.setVisible(true); //panel_1 is red
+				GameBoardPanel.setVisible(false);
+
+			}
+		});
+
+
+//------------------------------------------------------------------------------------
+
+		slider.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+					// should return the card in the hand @ that pos
+					String [] cardsInHand = playersHand.split(":");
+					currentSelectedCard = cardsInHand[slider.getValue()];
+
+					// print the current selected card
+					System.out.println(currentSelectedCard);
+
+					BufferedImage selectedCardImage = null;
+
+					try {
+
+						selectedCardImage = ImageIO.read(this.getClass().getResourceAsStream("/gameCards/"+currentSelectedCard+".jpg"));
+
+					} catch (IOException e1) {
+
+					}
+
+					Image theResizedCardImageForSelectedCard =
+							selectedCardImage.getScaledInstance(selectedCardLabel.getWidth(), selectedCardLabel.getHeight(),Image.SCALE_DEFAULT);
+
+					ImageIcon theSelectedCardIcon = new ImageIcon(theResizedCardImageForSelectedCard);
+
+					selectedCardLabel.setIcon(theSelectedCardIcon);
+				}
+		    });
+
+
+	}
+
+// Begin defining functions ==========================================================
+
+
+
+	@Override
+	public void run() {
+
+		receiveInitialData();
+
+		try {
+
+			System.out.print("\nPlayer" + player + " ENTERING WHILE LOOP\n");
+
+			while (continueToPlay) {
+
+				if (player == PLAYER1) {
+
+					System.out.print("\nPlayer" + player + " make a move\n");
+					// wait for player 1 to make a move
+					waitForPlayerAction();
+
+					System.out.print("\nPlayer" + player + " Sending move to server\n");
+					// Send the move to the server
+			        sendMove();
+
+			        System.out.print("\nPlayer" + player + " Waiting to recieve to move from server\n");
+			        // recieve update from server of player2's move
+					receiveInfoFromServer();
+
+				} else if (player == PLAYER2) {
+
+					System.out.print("\nPlayer" + player + " Waiting to recieve to move from server\n");
+					// Receive info from the server
+					receiveInfoFromServer();
+
+					System.out.print("\nPlayer" + player + " Waiting for player2 to move\n");
+					// Wait for player 2 to move
+					waitForPlayerAction();
+
+					System.out.print("\nPlayer" + player + " Sending move to server\n");
+					// Send player 2's move to the server
+					sendMove();
+
+				}
+			}
+		} catch (IOException | InterruptedException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+
+
+
+
+
+
+
+	}
+
+
+//------------------------------------------------------------------------------------
+
+
+	private void sendMove() {
+
+	    myTurn = false;
+	    drawButton.setEnabled(myTurn);
+		btnPlaythiscard.setEnabled(myTurn);
+
+		// check to see if action card
+		if (currentSelectedCard.contains("draw two")) {
+			status = DRAW_TWO;
+		} else if (currentSelectedCard.contains("wild")) {
+			status = WILD;
+		}
+
+		/** send the move to the server */
+		if (status == PLAYCARD) { // Play card
+
+			try {
+				// Send status to server that client wants to play a card
+				toServer.writeInt(PLAYCARD); // UnoServer:176, path:1
+				toServer.flush();
+
+				// send the index of the card to play to the server
+				toServer.writeInt(slider.getValue()); // UnoServer:182
+				toServer.flush();
+
+				// read the new hand after the play
+				playersHand = fromServer.readUTF(); // UnoServer:191
+
+				// displays the "You Win!" if player
+				if (playersHand.split(":").length == 0) {
+					showWinner("You");
+				}
+
+				// get the new topDiscard
+				topDiscardCard = fromServer.readUTF(); // UnoServer:195
+
+				// decrememnt the hand size
+				--handSize;
+				slider.setMaximum(handSize - 1);
+
+				// ============================== DISPLAY NEW CARDS =========================
+		    	String [] receivedCards = playersHand.split(":");
+		    	String middleCard = receivedCards[receivedCards.length/2];
+
+		    	BufferedImage middleCardImage = null;
+
+				try {
+
+					middleCardImage = ImageIO.read(this.getClass().getResourceAsStream("/gameCards/"+middleCard+".jpg"));
+
+				} catch (IOException e) {
+
+				}
+
+				Image theResizedCardImageForMiddleCard =
+						middleCardImage.getScaledInstance(selectedCardLabel.getWidth(), selectedCardLabel.getHeight(),Image.SCALE_DEFAULT);
+
+				ImageIcon theFlippedCardIcon = new ImageIcon(theResizedCardImageForMiddleCard);
+
+				selectedCardLabel.setIcon(theFlippedCardIcon);
+
+				BufferedImage topDiscardCardImage = null;
+
+				try {
+
+					topDiscardCardImage = ImageIO.read(this.getClass().getResourceAsStream("/gameCards/"+topDiscardCard+".jpg"));
+
+				} catch (IOException e) {
+
+				}
+
+				Image theResizedCardImageFortopDiscard =
+						topDiscardCardImage.getScaledInstance(topDiscard.getWidth(), topDiscard.getHeight(),Image.SCALE_DEFAULT);
+
+				ImageIcon topDiscardIcon = new ImageIcon(theResizedCardImageFortopDiscard);
+
+				topDiscard.setIcon(topDiscardIcon);
+
+			}
+			catch(IOException ex) {
+				ex.printStackTrace();
+			}
+
+		} else if (status == DRAW) { // PlayDraw
+
+			try {
+
+				System.out.println("Cards read from server before draw: " + playersHand);
+
+				//Send to server that client wants to draw a card
+				toServer.writeInt(DRAW); // UnoServer:176, path:2
+				toServer.flush();
+
+				//Send to server that client wants to draw a card
+				playersHand = fromServer.readUTF(); // UnoServer:216
+
+				// test to see if they hand updated correctly
+				System.out.println("Cards read from server after draw: " + playersHand);
+
+				// increase the slider to
+				++handSize;
+				slider.setMaximum(handSize - 1);
+
+			}
+			catch(IOException ex) {
+				ex.printStackTrace();
+			}
+		} else if (status == DRAW_TWO) {
+			try {
+				// Send status to server that client wants to play a card
+				toServer.writeInt(DRAW_TWO); // UnoServer:176, path:1
+				toServer.flush();
+
+				// send the index of the card to play to the server
+				toServer.writeInt(slider.getValue()); // UnoServer:182
+				toServer.flush();
+
+				// read the new hand after the play
+				playersHand = fromServer.readUTF(); // UnoServer:191
+
+				// displays the "You Win!" if player
+				if (playersHand.split(":").length == 0) {
+					showWinner("You");
+				}
+
+				// get the new topDiscard
+				topDiscardCard = fromServer.readUTF(); // UnoServer:195
+
+				// decrememnt the hand size
+				--handSize;
+				slider.setMaximum(handSize - 1);
+				
+				// read opponents hand size
+				int tmp = fromServer.readInt();
+				otherPlayerhandSize.setText(Integer.toString(tmp));
+
+				// ============================== DISPLAY NEW CARDS =========================
+		    	String [] receivedCards = playersHand.split(":");
+		    	String middleCard = receivedCards[receivedCards.length/2];
+
+		    	BufferedImage middleCardImage = null;
+
+		try {
+
+		middleCardImage = ImageIO.read(this.getClass().getResourceAsStream("/gameCards/"+middleCard+".jpg"));
+
+		} catch (IOException e) {
+
+		}
+
+		Image theResizedCardImageForMiddleCard =
+		middleCardImage.getScaledInstance(selectedCardLabel.getWidth(), selectedCardLabel.getHeight(),Image.SCALE_DEFAULT);
+
+		ImageIcon theFlippedCardIcon = new ImageIcon(theResizedCardImageForMiddleCard);
+
+		selectedCardLabel.setIcon(theFlippedCardIcon);
+
+		BufferedImage topDiscardCardImage = null;
+
+		try {
+
+		topDiscardCardImage = ImageIO.read(this.getClass().getResourceAsStream("/gameCards/"+topDiscardCard+".jpg"));
+
+		} catch (IOException e) {
+
+		}
+
+		Image theResizedCardImageFortopDiscard =
+		topDiscardCardImage.getScaledInstance(topDiscard.getWidth(), topDiscard.getHeight(),Image.SCALE_DEFAULT);
+
+		ImageIcon topDiscardIcon = new ImageIcon(theResizedCardImageFortopDiscard);
+
+		topDiscard.setIcon(topDiscardIcon);
+
+
+
+			} catch (IOException ex) {
+				ex.printStackTrace();
+			}
+		} else if (status == WILD){
+			try {
+				// Send status to server that client wants to play a card
+				toServer.writeInt(WILD); // UnoServer:176, path:1
+				toServer.flush();
+
+				// Send the color of the color chosen from the wild card
+				toServer.writeUTF(wildCardColor);
+
+				// send the index of the card to play to the server
+				toServer.writeInt(slider.getValue()); // UnoServer:182
+				toServer.flush();
+
+				// read the new hand after the play
+				playersHand = fromServer.readUTF(); // UnoServer:191
+
+				// displays the "You Win!" if player
+				if (playersHand.split(":").length == 0) {
+					showWinner("You");
+				}
+
+				// get the new topDiscard
+				topDiscardCard = fromServer.readUTF(); // UnoServer:195
+
+				// decrememnt the hand size
+				--handSize;
+				slider.setMaximum(handSize - 1);
+
+				// ============================== DISPLAY NEW CARDS =========================
+				    	String [] receivedCards = playersHand.split(":");
+				    	String middleCard = receivedCards[receivedCards.length/2];
+
+				    	BufferedImage middleCardImage = null;
+
+				try {
+
+				middleCardImage = ImageIO.read(this.getClass().getResourceAsStream("/gameCards/"+middleCard+".jpg"));
+
+				} catch (IOException e) {
+
+				}
+
+				Image theResizedCardImageForMiddleCard =
+				middleCardImage.getScaledInstance(selectedCardLabel.getWidth(), selectedCardLabel.getHeight(),Image.SCALE_DEFAULT);
+
+				ImageIcon theFlippedCardIcon = new ImageIcon(theResizedCardImageForMiddleCard);
+
+				selectedCardLabel.setIcon(theFlippedCardIcon);
+
+				BufferedImage topDiscardCardImage = null;
+
+				try {
+
+				topDiscardCardImage = ImageIO.read(this.getClass().getResourceAsStream("/gameCards/"+topDiscardCard+".jpg"));
+
+				} catch (IOException e) {
+
+				}
+
+				Image theResizedCardImageFortopDiscard =
+				topDiscardCardImage.getScaledInstance(topDiscard.getWidth(), topDiscard.getHeight(),Image.SCALE_DEFAULT);
+
+				ImageIcon topDiscardIcon = new ImageIcon(theResizedCardImageFortopDiscard);
+
+				topDiscard.setIcon(topDiscardIcon);
+
+				}
+				catch(IOException ex) {
+					ex.printStackTrace();
+				}
+			}
+	}
+
+
+
+//------------------------------------------------------------------------------------
+
+
+	public void receiveInfoFromServer() throws IOException {
+
+	    myTurn = false;
+
+	    playersHand = fromServer.readUTF();
+
+
+		status = fromServer.readInt();
+		System.out.println("STATUS_CODE: " + status);
+
+		checkStatus(status);
+
+	    drawButton.setEnabled(myTurn);
+		btnPlaythiscard.setEnabled(myTurn);
+		int tmp = 0;
+
+		// get the play from the user
+		topDiscardCard = fromServer.readUTF();
+		System.out.print("Top discarded Card: " + topDiscardCard);
 		
+		// get the new hand of the other player
+		tmp = fromServer.readInt();
+		otherPlayerhandSize.setText(Integer.toString(tmp));
 
+		// ============================== DISPLAY NEW CARDS =========================
+    	String [] receivedCards = playersHand.split(":");
+    	String middleCard = receivedCards[receivedCards.length/2];
 
-    }
+    	BufferedImage middleCardImage = null;
 
-    // Begin defining functions
-    // ==========================================================
+		try {
 
+			middleCardImage = ImageIO.read(this.getClass().getResourceAsStream("/gameCards/"+middleCard+".jpg"));
 
-    @Override
-    public void run() {
+		} catch (IOException e) {
 
-        receiveInitialData();
+		}
 
-        try {
+		Image theResizedCardImageForMiddleCard =
+				middleCardImage.getScaledInstance(selectedCardLabel.getWidth(), selectedCardLabel.getHeight(),Image.SCALE_DEFAULT);
 
-            System.out.print("\nPlayer" + player + " ENTERING WHILE LOOP\n");
+		ImageIcon theFlippedCardIcon = new ImageIcon(theResizedCardImageForMiddleCard);
 
-            while (continueToPlay) {
+		selectedCardLabel.setIcon(theFlippedCardIcon);
 
-                if (player == PLAYER1) {
+		BufferedImage topDiscardCardImage = null;
 
-                    System.out.print("\nPlayer" + player + " make a move\n");
-                    // wait for player 1 to make a move
-                    waitForPlayerAction();
+		try {
 
-                    System.out.print("\nPlayer" + player + " Sending move to " + "server\n");
-                    // Send the move to the server
-                    sendMove();
+			topDiscardCardImage = ImageIO.read(this.getClass().getResourceAsStream("/gameCards/"+topDiscardCard+".jpg"));
 
-                    System.out.print("\nPlayer" + player + " Waiting to "
-                        + "recieve to move from server\n");
-                    // recieve update from server of player2's move
-                    receiveInfoFromServer();
+		} catch (IOException e) {
 
-                } else if (player == PLAYER2) {
+		}
 
-                    System.out.print("\nPlayer" + player + " Waiting to "
-                        + "recieve to move from server\n");
-                    // Receive info from the server
-                    receiveInfoFromServer();
+		Image theResizedCardImageFortopDiscard =
+				topDiscardCardImage.getScaledInstance(topDiscard.getWidth(), topDiscard.getHeight(),Image.SCALE_DEFAULT);
 
-                    System.out.print("\nPlayer" + player + " Waiting for " + "player2 to move\n");
-                    // Wait for player 2 to move
-                    waitForPlayerAction();
+		ImageIcon topDiscardIcon = new ImageIcon(theResizedCardImageFortopDiscard);
 
-                    System.out.print("\nPlayer" + player + " Sending move to " + "server\n");
-                    // Send player 2's move to the server
-                    sendMove();
+		topDiscard.setIcon(topDiscardIcon);
 
-                }
-            }
-        } catch (IOException | InterruptedException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
-        }
+	}
 
+//------------------------------------------------------------------------------------
 
-    }
+		private void waitForPlayerAction() throws InterruptedException {
 
+		    myTurn = true;
+		    drawButton.setEnabled(myTurn);
+			btnPlaythiscard.setEnabled(myTurn);
 
-    //------------------------------------------------------------------------------------
+		    while (waiting) {
+		    	Thread.sleep(100);
+		    }
 
+	    	waiting = true;
+		}
 
-    private void sendMove() {
+//------------------------------------------------------------------------------------
 
-        myTurn = false;
-        drawButton.setEnabled(myTurn);
-        btnPlaythiscard.setEnabled(myTurn);
 
-        // check to see if action card
-        if (currentSelectedCard.contains("draw two")) {
-            status = DRAW_TWO;
-        } else if (currentSelectedCard.contains("wild")) {
-            status = WILD;
-        }
+		private void connectToServer() {
+			// --------------- Connect to server ----------------------------
+		    try {
+		        // Create a socket to connect to the server
+		        Socket socket = new Socket(host, port); // localhost:8000
 
-        /** send the move to the server */
-        if (status == PLAYCARD) { // Play card
+		        // Create IO streams to input/output data from the server
+		        fromServer = new DataInputStream(socket.getInputStream());
+		        toServer =  new DataOutputStream(socket.getOutputStream() );
+		      }
+		      catch (IOException ex) {
+		        System.out.println(ex.toString());
+		      }
 
-            try {
-                // Send status to server that client wants to play a card
-                toServer.writeInt(PLAYCARD); // UnoServer:176, path:1
-                toServer.flush();
+		    // Control the game on a separate thread
+		    Thread thread = new Thread(this);
+		    thread.start();
 
-                // send the index of the card to play to the server
-                toServer.writeInt(slider.getValue()); // UnoServer:182
-                toServer.flush();
+		    // -----------------------------------------------------------------
 
-                // read the new hand after the play
-                playersHand = fromServer.readUTF(); // UnoServer:191
+		}
 
-                // displays the "You Win!" if player
-                if (playersHand.split(":").length == 0) {
-                    showWinner("You");
-                }
+//------------------------------------------------------------------------------------
 
-                // get the new topDiscard
-                topDiscardCard = fromServer.readUTF(); // UnoServer:195
+		// These functions should be in the GameLogic.java file
 
-                // decrememnt the hand size
-                --handSize;
-                slider.setMaximum(handSize - 1);
+		private String validatePlay(String pCurrentCard, String pLastPlayedCard) {
+			String [] played = pCurrentCard.split(",");
+			String [] checkAgainst = pLastPlayedCard.split(",");
 
-                // ============================== DISPLAY NEW CARDS
-                // =========================
-                String[] receivedCards = playersHand.split(":");
-                String middleCard = receivedCards[receivedCards.length / 2];
+			// checks the current selected card against the card last played
+			if (played[1].equals("wild")) {
+				System.out.println("wildCard played!");
+				isValidPlay = true;
+				// select a new color to play
+				wildCardColor = wildDialog();
+				while (wildCardColor.equals("No option chosen")) {
+				wildCardColor = wildDialog();
+			}
 
-                BufferedImage middleCardImage = null;
+			return colorChosen;
+			} else if (played[0].equals(checkAgainst[0])) {
+				System.out.println("Colors match!");
+				isValidPlay = true;
 
-                try {
+			} else if (played[1].equals(checkAgainst[1])) {
+				System.out.println("Values match!");
+				isValidPlay = true;
 
-                    middleCardImage = ImageIO.read(this.getClass()
-                        .getResourceAsStream("/gameCards/" + middleCard + ".jpg"));
+			}  else {
+				System.out.println("Invalid play!");
+				isValidPlay = false;
+			}
 
-                } catch (IOException e) {
-                    System.out.println(e.getMessage());
-                }
+			return null;
+		}
 
-                Image theResizedCardImageForMiddleCard =
-                    middleCardImage.getScaledInstance(selectedCardLabel
-                            .getWidth(), selectedCardLabel
-                            .getHeight(),
-                        Image.SCALE_DEFAULT);
+//------------------------------------------------------------------------------------
 
-                ImageIcon theFlippedCardIcon = new ImageIcon(theResizedCardImageForMiddleCard);
 
-                selectedCardLabel.setIcon(theFlippedCardIcon);
+	public void receiveInitialData() {
 
-                BufferedImage topDiscardCardImage = null;
+		// set the player to the player number they are
+	    try {
+			player = fromServer.readInt(); // UnoServer:52 | UnoServer:64
+		    // set the opponents label and turn
+		    if (player == PLAYER1) {
+		    	otherPlayerName.setText("Player 2");
+		    	myTurn = true; // set player1's turn to true
 
-                try {
+		    } else {
+		    	otherPlayerName.setText("Player 1");
+		    	btnPlaythiscard.setEnabled(myTurn);
+				drawButton.setEnabled(myTurn);
+		    }
 
-                    topDiscardCardImage = ImageIO.read(this.getClass()
-                        .getResourceAsStream("/gameCards/" + topDiscardCard + ".jpg"));
+		    // recieve card amount of opponent from server
+	    	opponentCardCount = fromServer.readInt(); // UnoServer:277
+	    	otherPlayerhandSize.setText(Integer.toString(opponentCardCount));
 
-                } catch (IOException e) {
-                    System.out.println(e.getMessage());
-                }
+	    	// recieves the correct card that was initially discarded
+	    	topDiscardCard = fromServer.readUTF(); // UnoServer:280
+		    System.out.println("card to play:\n" + topDiscardCard);
 
-                Image theResizedCardImageFortopDiscard =
-                    topDiscardCardImage.getScaledInstance(topDiscard
-                        .getWidth(), topDiscard.getHeight(), Image
-                        .SCALE_DEFAULT);
+		    // recieves the players delt hand
+	    	playersHand = fromServer.readUTF(); // UnoServer:283
+	    	System.out.println("Player hand:\n" + playersHand);
 
-                ImageIcon topDiscardIcon = new ImageIcon(theResizedCardImageFortopDiscard);
+	    	// ============================== DISPLAY INITIAL CARDS =========================
+	    	String [] receivedCards = playersHand.split(":");
+	    	String middleCard = receivedCards[receivedCards.length/2];
+	    	currentSelectedCard = middleCard;
 
-                topDiscard.setIcon(topDiscardIcon);
+	    	BufferedImage middleCardImage = null;
 
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
+			try {
 
-        } else if (status == DRAW) { // PlayDraw
+				middleCardImage = ImageIO.read(this.getClass().getResourceAsStream("/gameCards/"+middleCard+".jpg"));
 
-            try {
+			} catch (IOException e) {
 
-                System.out.println("Cards read from server before draw: " + playersHand);
+			}
 
-                //Send to server that client wants to draw a card
-                toServer.writeInt(DRAW); // UnoServer:176, path:2
-                toServer.flush();
+			Image theResizedCardImageForMiddleCard =
+					middleCardImage.getScaledInstance(selectedCardLabel.getWidth(), selectedCardLabel.getHeight(),Image.SCALE_DEFAULT);
 
-                //Send to server that client wants to draw a card
-                playersHand = fromServer.readUTF(); // UnoServer:216
+			ImageIcon theFlippedCardIcon = new ImageIcon(theResizedCardImageForMiddleCard);
 
-                // test to see if they hand updated correctly
-                System.out.println("Cards read from server after draw: " +  playersHand);
+			selectedCardLabel.setIcon(theFlippedCardIcon);
 
-                // increase the slider to
-                ++handSize;
-                slider.setMaximum(handSize - 1);
+			BufferedImage topDiscardCardImage = null;
 
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-        } else if (status == DRAW_TWO) {
-            try {
-                // Send status to server that client wants to play a card
-                toServer.writeInt(DRAW_TWO); // UnoServer:176, path:1
-                toServer.flush();
+			try {
 
-                // send the index of the card to play to the server
-                toServer.writeInt(slider.getValue()); // UnoServer:182
-                toServer.flush();
+				topDiscardCardImage = ImageIO.read(this.getClass().getResourceAsStream("/gameCards/"+topDiscardCard+".jpg"));
 
-                // read the new hand after the play
-                playersHand = fromServer.readUTF(); // UnoServer:191
+			} catch (IOException e) {
 
-                // displays the "You Win!" if player
-                if (playersHand.split(":").length == 0) {
-                    showWinner("You");
-                }
+			}
 
-                // get the new topDiscard
-                topDiscardCard = fromServer.readUTF(); // UnoServer:195
+			Image theResizedCardImageFortopDiscard =
+					topDiscardCardImage.getScaledInstance(topDiscard.getWidth(), topDiscard.getHeight(),Image.SCALE_DEFAULT);
 
-                // decrememnt the hand size
-                --handSize;
-                slider.setMaximum(handSize - 1);
+			ImageIcon topDiscardIcon = new ImageIcon(theResizedCardImageFortopDiscard);
 
-                // read opponents hand size
-                int tmp = fromServer.readInt();
-                otherPlayerhandSize.setText(Integer.toString(tmp));
+			topDiscard.setIcon(topDiscardIcon);
 
-                // ============================== DISPLAY NEW CARDS
-                // =========================
-                String[] receivedCards = playersHand.split(":");
-                String middleCard = receivedCards[receivedCards.length / 2];
+			// =====================================================================================================
 
-                BufferedImage middleCardImage = null;
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+	}
+//------------------------------------------------------------------------------------
 
-                try {
 
-                    middleCardImage = ImageIO.read(this.getClass()
-                        .getResourceAsStream("/gameCards/" + middleCard + ".jpg"));
+		private void showWinner(String winner) {
 
-                } catch (IOException e) {
-                    System.out.println(e.getMessage());
+			JOptionPane.showMessageDialog(null,
+				    winner + " won!",
+				    "GAME OVER!",
+				    JOptionPane.ERROR_MESSAGE);
+		}
 
-                }
 
-                Image theResizedCardImageForMiddleCard =
-                    middleCardImage.getScaledInstance(selectedCardLabel
-                            .getWidth(), selectedCardLabel
-                            .getHeight(),
-                        Image.SCALE_DEFAULT);
 
-                ImageIcon theFlippedCardIcon = new ImageIcon(theResizedCardImageForMiddleCard);
+//------------------------------------------------------------------------------------
+		// if condition to check to see if it is win lose or tie
+		public void checkStatus(int newStatus) {
 
-                selectedCardLabel.setIcon(theFlippedCardIcon);
+			if (newStatus == PLAYER1_WON) {
 
-                BufferedImage topDiscardCardImage = null;
+				continueToPlay = false;
+				System.out.println("PLAYER1_WON");
+				showWinner("Player1");
 
-                try {
+			} else if (newStatus == PLAYER2_WON) {
 
-                    topDiscardCardImage = ImageIO.read(this.getClass()
-                        .getResourceAsStream("/gameCards/" + topDiscardCard + ".jpg"));
+				continueToPlay = false;
+				System.out.println("PLAYER2_WON");
+				showWinner("Player2");
 
-                } catch (IOException e) {
-                    System.out.println(e.getMessage());
+			} else if (newStatus == DRAW_GAME) {
 
-                }
+				continueToPlay = false;
+				System.out.println("DRAW");
+				showWinner("No one");
+			}
 
-                Image theResizedCardImageFortopDiscard =
-                    topDiscardCardImage.getScaledInstance(topDiscard
-                        .getWidth(), topDiscard.getHeight(), Image
-                        .SCALE_DEFAULT);
+		}
 
-                ImageIcon topDiscardIcon = new ImageIcon(theResizedCardImageFortopDiscard);
+		//------------------------------------------------------------------------------------
 
-                topDiscard.setIcon(topDiscardIcon);
 
+		public String wildDialog(){
+			Object[] colors = {"blue", "red", "yellow", "green"};
+			String response = (String)JOptionPane.showInputDialog(
+			                    null,null,
+			                    "Choose Color",
+			                    JOptionPane.PLAIN_MESSAGE,
+			                    null,
+			                    colors,
+			                    "blue");
 
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-        } else if (status == WILD) {
-            try {
-                // Send status to server that client wants to play a card
-                toServer.writeInt(WILD); // UnoServer:176, path:1
-                toServer.flush();
-
-                // Send the color of the color chosen from the wild card
-                toServer.writeUTF(wildCardColor);
-
-                // send the index of the card to play to the server
-                toServer.writeInt(slider.getValue()); // UnoServer:182
-                toServer.flush();
-
-                // read the new hand after the play
-                playersHand = fromServer.readUTF(); // UnoServer:191
-
-                // displays the "You Win!" if player
-                if (playersHand.split(":").length == 0) {
-                    showWinner("You");
-                }
-
-                // get the new topDiscard
-                topDiscardCard = fromServer.readUTF(); // UnoServer:195
-
-                // decrememnt the hand size
-                --handSize;
-                slider.setMaximum(handSize);
-
-                // ============================== DISPLAY NEW CARDS
-                // =========================
-                String[] receivedCards = playersHand.split(":");
-                String middleCard = receivedCards[receivedCards.length / 2];
-
-                BufferedImage middleCardImage = null;
-
-                try {
-
-                    middleCardImage = ImageIO.read(this.getClass()
-                        .getResourceAsStream("/gameCards/" + middleCard + ".jpg"));
-
-                } catch (IOException e) {
-                    System.out.println(e.getMessage());
-
-                }
-
-                Image theResizedCardImageForMiddleCard =
-                    middleCardImage.getScaledInstance(selectedCardLabel
-                            .getWidth(), selectedCardLabel
-                            .getHeight(),
-                        Image.SCALE_DEFAULT);
-
-                ImageIcon theFlippedCardIcon = new ImageIcon(theResizedCardImageForMiddleCard);
-
-                selectedCardLabel.setIcon(theFlippedCardIcon);
-
-                BufferedImage topDiscardCardImage = null;
-
-                try {
-
-                    topDiscardCardImage = ImageIO.read(this.getClass()
-                        .getResourceAsStream("/gameCards/" + topDiscardCard + ".jpg"));
-
-                } catch (IOException e) {
-                    System.out.println(e.getMessage());
-
-                }
-
-                Image theResizedCardImageFortopDiscard =
-                    topDiscardCardImage.getScaledInstance(topDiscard
-                        .getWidth(), topDiscard.getHeight(), Image
-                        .SCALE_DEFAULT);
-
-                ImageIcon topDiscardIcon = new ImageIcon(theResizedCardImageFortopDiscard);
-
-                topDiscard.setIcon(topDiscardIcon);
-
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-        }
-    }
-
-
-    //------------------------------------------------------------------------------------
-
-
-    public void receiveInfoFromServer() throws IOException {
-
-        myTurn = false;
-
-        playersHand = fromServer.readUTF();
-
-
-        status = fromServer.readInt();
-        System.out.println("STATUS_CODE: " + status);
-
-        checkStatus(status);
-
-        drawButton.setEnabled(myTurn);
-        btnPlaythiscard.setEnabled(myTurn);
-        int tmp = 0;
-
-        // get the play from the user
-        topDiscardCard = fromServer.readUTF();
-        System.out.print("Top discarded Card: " + topDiscardCard);
-
-        // get the new hand of the other player
-        tmp = fromServer.readInt();
-        otherPlayerhandSize.setText(Integer.toString(tmp));
-
-        // ============================== DISPLAY NEW CARDS
-        // =========================
-        String[] receivedCards = playersHand.split(":");
-        String middleCard = receivedCards[receivedCards.length / 2];
-
-        BufferedImage middleCardImage = null;
-
-        try {
-
-            middleCardImage = ImageIO.read(this.getClass()
-                .getResourceAsStream("/gameCards/" + middleCard + ".jpg"));
-
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
-
-        }
-
-        Image theResizedCardImageForMiddleCard =
-            middleCardImage.getScaledInstance(selectedCardLabel.getWidth(),
-                selectedCardLabel.getHeight(), Image.SCALE_DEFAULT);
-
-        ImageIcon theFlippedCardIcon = new ImageIcon(theResizedCardImageForMiddleCard);
-
-        selectedCardLabel.setIcon(theFlippedCardIcon);
-
-        BufferedImage topDiscardCardImage = null;
-
-        try {
-
-            topDiscardCardImage = ImageIO.read(this.getClass()
-                .getResourceAsStream("/gameCards/" + topDiscardCard + "" + ".jpg"));
-
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
-
-        }
-
-        Image theResizedCardImageFortopDiscard =
-            topDiscardCardImage.getScaledInstance(topDiscard.getWidth(),
-                topDiscard.getHeight(), Image.SCALE_DEFAULT);
-
-        ImageIcon topDiscardIcon = new ImageIcon(theResizedCardImageFortopDiscard);
-
-        topDiscard.setIcon(topDiscardIcon);
-
-    }
-
-    //------------------------------------------------------------------------------------
-
-    private void waitForPlayerAction() throws InterruptedException {
-
-        myTurn = true;
-        drawButton.setEnabled(myTurn);
-        btnPlaythiscard.setEnabled(myTurn);
-
-        while (waiting) {
-            Thread.sleep(100);
-        }
-
-        waiting = true;
-    }
-
-    //------------------------------------------------------------------------------------
-
-
-    private void connectToServer() {
-        // --------------- Connect to server ----------------------------
-        try {
-            // Create a socket to connect to the server
-            Socket socket = new Socket(host, port); // localhost:8000
-
-            // Create IO streams to input/output data from the server
-            fromServer = new DataInputStream(socket.getInputStream());
-            toServer = new DataOutputStream(socket.getOutputStream());
-        } catch (IOException ex) {
-            System.out.println(ex.toString());
-        }
-
-        // Control the game on a separate thread
-        Thread thread = new Thread(this);
-        thread.start();
-
-        // -----------------------------------------------------------------
-
-    }
-
-    //------------------------------------------------------------------------------------
-
-    // These functions should be in the GameLogic.java file
-
-    private String validatePlay(String pCurrentCard, String pLastPlayedCard) {
-        String[] played = pCurrentCard.split(",");
-        String[] checkAgainst = pLastPlayedCard.split(",");
-
-        // checks the current selected card against the card last played
-        if (played[1].equals("wild")) {
-            System.out.println("wildCard played!");
-            isValidPlay = true;
-            // select a new color to play
-            wildCardColor = wildDialog();
-            while (wildCardColor.equals("No option chosen")) {
-                wildCardColor = wildDialog();
-            }
-
-            return colorChosen;
-        } else if (played[0].equals(checkAgainst[0])) {
-            System.out.println("Colors match!");
-            isValidPlay = true;
-
-        } else if (played[1].equals(checkAgainst[1])) {
-            System.out.println("Values match!");
-            isValidPlay = true;
-
-        } else {
-            System.out.println("Invalid play!");
-            isValidPlay = false;
-        }
-
-        return null;
-    }
-
-    //------------------------------------------------------------------------------------
-
-
-    public void receiveInitialData() {
-
-        // set the player to the player number they are
-        try {
-            player = fromServer.readInt(); // UnoServer:52 | UnoServer:64
-            // set the opponents label and turn
-            if (player == PLAYER1) {
-                otherPlayerName.setText("Player 2");
-                myTurn = true; // set player1's turn to true
-
-            } else {
-                otherPlayerName.setText("Player 1");
-                btnPlaythiscard.setEnabled(myTurn);
-                drawButton.setEnabled(myTurn);
-            }
-
-            // recieve card amount of opponent from server
-            opponentCardCount = fromServer.readInt(); // UnoServer:277
-            otherPlayerhandSize.setText(Integer.toString(opponentCardCount));
-
-            // recieves the correct card that was initially discarded
-            topDiscardCard = fromServer.readUTF(); // UnoServer:280
-            System.out.println("card to play:\n" + topDiscardCard);
-
-            // recieves the players delt hand
-            playersHand = fromServer.readUTF(); // UnoServer:283
-            System.out.println("Player hand:\n" + playersHand);
-
-            // ============================== DISPLAY INITIAL CARDS
-            // =========================
-            String[] receivedCards = playersHand.split(":");
-            String middleCard = receivedCards[receivedCards.length / 2];
-            currentSelectedCard = middleCard;
-
-            BufferedImage middleCardImage = null;
-
-            try {
-
-                middleCardImage = ImageIO.read(this.getClass()
-                    .getResourceAsStream("/gameCards/" + middleCard + "" + ".jpg"));
-
-            } catch (IOException e) {
-                System.out.println(e.getMessage());
-
-            }
-
-            Image theResizedCardImageForMiddleCard =
-                middleCardImage.getScaledInstance(selectedCardLabel
-                    .getWidth(), selectedCardLabel.getHeight(), Image
-                    .SCALE_DEFAULT);
-
-            ImageIcon theFlippedCardIcon = new ImageIcon(theResizedCardImageForMiddleCard);
-
-            selectedCardLabel.setIcon(theFlippedCardIcon);
-
-            BufferedImage topDiscardCardImage = null;
-
-            try {
-
-                topDiscardCardImage = ImageIO.read(this.getClass()
-                    .getResourceAsStream("/gameCards/" + topDiscardCard + ".jpg"));
-
-            } catch (IOException e) {
-                System.out.println(e.getMessage());
-
-            }
-
-            Image theResizedCardImageFortopDiscard =
-                topDiscardCardImage.getScaledInstance(topDiscard.getWidth(),
-                    topDiscard.getHeight(), Image.SCALE_DEFAULT);
-
-            ImageIcon topDiscardIcon = new ImageIcon(theResizedCardImageFortopDiscard);
-
-            topDiscard.setIcon(topDiscardIcon);
-
-            // ===============================
-
-        } catch (IOException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
-        }
-    }
-    //------------------------------------------------------------------------------------
-
-
-    private void showWinner(String winner) {
-
-        JOptionPane.showMessageDialog(null,
-            winner + " won!",
-            "GAME OVER!",
-            JOptionPane.ERROR_MESSAGE);
-    }
-
-
-    //------------------------------------------------------------------------------------
-    // if condition to check to see if it is win lose or tie
-    public void checkStatus(int newStatus) {
-
-        if (newStatus == PLAYER1_WON) {
-
-            continueToPlay = false;
-            System.out.println("PLAYER1_WON");
-            showWinner("Player1");
-
-        } else if (newStatus == PLAYER2_WON) {
-
-            continueToPlay = false;
-            System.out.println("PLAYER2_WON");
-            showWinner("Player2");
-
-        } else if (newStatus == DRAW_GAME) {
-
-            continueToPlay = false;
-            System.out.println("DRAW");
-            showWinner("No one");
-        }
-
-    }
-
-    //------------------------------------------------------------------------------------
-
-
-    public String wildDialog() {
-        Object[] colors = {"blue", "red", "yellow", "green"};
-        String response = (String) JOptionPane.showInputDialog(
-            null, null,
-            "Choose Color",
-            JOptionPane.PLAIN_MESSAGE,
-            null,
-            colors,
-            "blue");
-
-        //If a string was returned, say so.
-        if ((response != null) && (response.length() > 0)) {
-            return response;
-        }
-        return "No option chosen";
-    }
+			//If a string was returned, say so.
+			if ((response != null) && (response.length() > 0)) {
+			    return response;
+			}
+			return "No option chosen";
+			}
 }
