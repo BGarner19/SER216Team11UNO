@@ -32,8 +32,8 @@ public class UnodeckTest {
 
         newDeck.fillDeck();
 
-        assertTrue(newDeck.deckSize == 74);
-        assertTrue(newDeck.deck[73] != null);
+        assertEquals(74, newDeck.deckSize);
+        assertNotNull(newDeck.deck[73]);
 
     }
 
@@ -54,7 +54,7 @@ public class UnodeckTest {
 
         newDeck.pushCard(card);
 
-        assertTrue(newDeck.deck[0].equals(card));
+        assertEquals(newDeck.deck[0], card);
 
     }
 
@@ -68,21 +68,21 @@ public class UnodeckTest {
     @Test
     public void testPop() {
 
-        assertTrue(deck.popCard().equals(deck.deck[73]));
-        assertTrue(deck.deckSize == 73);
+        assertEquals(deck.popCard(), deck.deck[73]);
+        assertEquals(73, deck.deckSize);
     }
 
     @Test
     public void testPeekFull() {
-        assertTrue(deck.peekCard().equals(deck.deck[73]));
-        assertTrue(deck.deckSize == 74);
+        assertEquals(deck.peekCard(), deck.deck[73]);
+        assertEquals(74, deck.deckSize);
     }
 
     @Test
     public void testPeekEmpty() {
         Unodeck unodeck = new Unodeck();
 
-        assertTrue(unodeck.peekCard() == null);
+        assertNull(unodeck.peekCard());
     }
 
     @Test
@@ -101,6 +101,6 @@ public class UnodeckTest {
 
         unodeck.deckSize = 2;
 
-        assertTrue(unodeck.peekCard().equals(card2));
+        assertEquals(unodeck.peekCard(), card2);
     }
 }
