@@ -146,7 +146,7 @@ public class UnoPanel extends JFrame implements UnoConstants, Runnable {
 		GameBoardPanel.add(otherPlayerName);
 
 		// other player hand size
-		otherPlayerhandSize = new JLabel("handSize");
+		otherPlayerhandSize = new JLabel("0");
 		otherPlayerhandSize.setForeground(Color.WHITE);
 		otherPlayerhandSize.setBounds(451, 102, 61, 16);
 		GameBoardPanel.add(otherPlayerhandSize);
@@ -442,7 +442,7 @@ public class UnoPanel extends JFrame implements UnoConstants, Runnable {
 
 					BufferedImage selectedCardImage = null;
 
-					
+
 
                     selectedCardImage = ImageIO.read(this.getClass().getResourceAsStream("/gameCards/"+currentSelectedCard+".jpg"));
 
