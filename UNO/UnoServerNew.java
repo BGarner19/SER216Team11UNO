@@ -31,6 +31,7 @@ public class UnoServerNew extends JFrame implements UnoConstants {
 	    setTitle("UNOSERVER");
 	    setSize(500, 300);
 	    setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
 	    setVisible(true); // It is necessary to show the frame here!
 
 		// Try-Catch block
@@ -138,6 +139,9 @@ class HandleASession implements Runnable, UnoConstants
 				DataOutputStream toPlayer1 = new DataOutputStream(player1socket.getOutputStream());
 				DataInputStream fromPlayer2 = new DataInputStream(player2socket.getInputStream());
 				DataOutputStream toPlayer2 = new DataOutputStream(player2socket.getOutputStream());
+				DataInputStream player1Left = new DataInputStream(player1socket.getInputStream());
+				DataOutputStream player2Left = new DataOutputStream(player2socket.getOutputStream());
+
 
 //				_______________________________________________________________________________
 //				||||| sends info to UnoPanel:631 respective to player number |||||
@@ -294,7 +298,8 @@ class HandleASession implements Runnable, UnoConstants
 				// wild card was played
 				sendStatus = WILD;
 
-			} else {
+			}
+			else {
 
 				sendStatus = CONTINUE;
 			}

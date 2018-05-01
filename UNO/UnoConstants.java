@@ -4,6 +4,8 @@ public interface UnoConstants {
 	public static final int PLAYER2 = 2; // Indicate player 2
 	public static final int PLAYER1_WON = 100; // Indicate player 1 won
 	public static final int PLAYER2_WON = 200; // Indicate player 2 won
+	public static final int PLAYER1_LEFT = 400;
+	public static final int PLAYER2_LEFT = 500;
 	public static final int DRAW_GAME = 300; // Indicate player 2 won
 	public static final int DRAW = 3; // Indicate a draw
 	public static final int PLAYCARD = 4; // Indicate a played card

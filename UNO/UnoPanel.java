@@ -1,5 +1,4 @@
 
-import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.awt.Image;
 
@@ -23,12 +22,8 @@ import java.io.IOException;
 import java.net.Socket;
 import java.awt.event.ActionEvent;
 import java.awt.Color;
-import javax.swing.JLayeredPane;
 import javax.swing.JOptionPane;
-import javax.swing.JTextField;
 import javax.swing.UIManager;
-import javax.swing.JTextPane;
-import javax.swing.SwingConstants;
 
 public class UnoPanel extends JFrame implements UnoConstants, Runnable {
 
@@ -76,6 +71,7 @@ public class UnoPanel extends JFrame implements UnoConstants, Runnable {
 		JLabel topDiscard;
 		JLabel GameMenuLabel;
 		JLabel otherPlayerhandSize;
+		JLabel playerHandSize;
 
 		// buttons
 		JButton btnGame;
@@ -146,7 +142,7 @@ public class UnoPanel extends JFrame implements UnoConstants, Runnable {
 		GameBoardPanel.add(otherPlayerName);
 
 		// other player hand size
-		otherPlayerhandSize = new JLabel("handSize");
+		otherPlayerhandSize = new JLabel("Other Players Hand Size: "+handSize+"");
 		otherPlayerhandSize.setForeground(Color.WHITE);
 		otherPlayerhandSize.setBounds(451, 102, 61, 16);
 		GameBoardPanel.add(otherPlayerhandSize);
@@ -184,6 +180,11 @@ public class UnoPanel extends JFrame implements UnoConstants, Runnable {
 		btnPlaythiscard = new JButton("PlayThisCard");
 		btnPlaythiscard.setBounds(490, 530, 117, 29);
 		GameBoardPanel.add(btnPlaythiscard);
+
+		playerHandSize = new JLabel("Your Handsize: " +handSize+"");
+		playerHandSize.setForeground(Color.WHITE);
+		playerHandSize.setBounds(525, 550, 117, 29);
+		GameBoardPanel.add(playerHandSize);
 
 		GameBoardPanel.setVisible(false);
 		// Add play button to GameMenuPanel
@@ -297,6 +298,12 @@ public class UnoPanel extends JFrame implements UnoConstants, Runnable {
 			    	System.exit(0);
 			    	try {
 			    		toServer.writeBoolean(false);
+						if (player == PLAYER1){
+							toServer.writeInt(PLAYER1_LEFT);
+						} else if (player == PLAYER2) {
+							toServer.writeInt(PLAYER2_LEFT);
+						}
+
 			    		toServer.flush();
 					} catch (IOException e1) {
 						e1.printStackTrace();
@@ -1029,6 +1036,14 @@ public class UnoPanel extends JFrame implements UnoConstants, Runnable {
 				continueToPlay = false;
 				System.out.println("DRAW");
 				showWinner("No one");
+			} else if (newStatus == PLAYER1_LEFT) {
+				continueToPlay = false;
+				System.out.println("PLAYER1_LEFT");
+				playerLeaves("Player 1");
+			} else if (newStatus == PLAYER2_LEFT) {
+				continueToPlay = false;
+				System.out.println("PLAYER2_LEFT");
+				playerLeaves("Player 2");
 			}
 
 		}
@@ -1052,4 +1067,14 @@ public class UnoPanel extends JFrame implements UnoConstants, Runnable {
 			}
 			return "No option chosen";
 			}
+
+		private void playerLeaves(String playerLeft){
+			JOptionPane.showMessageDialog(null,
+					playerLeft + " left the game!",
+					"GAME OVER",
+					JOptionPane.ERROR_MESSAGE);
+		}
+
+
+
 }
