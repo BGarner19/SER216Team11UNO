@@ -453,7 +453,7 @@ public class UnoPanel extends JFrame implements UnoConstants, Runnable {
 
                     selectedCardLabel.setIcon(theSelectedCardIcon);
 					} catch (Exception e1) {
-                        System.out.print("WAITING FOR OTHER PLAYER!!\n");
+                        
 					}
 
 
@@ -566,48 +566,51 @@ public class UnoPanel extends JFrame implements UnoConstants, Runnable {
 				slider.setMaximum(handSize - 1);
 
 				// ============================== DISPLAY NEW CARDS =========================
-		    	String [] receivedCards = playersHand.split(":");
+			    	String [] receivedCards = playersHand.split(":");
 		    	String middleCard = receivedCards[receivedCards.length/2];
 
 		    	BufferedImage middleCardImage = null;
 
-				try {
+				try 
+				{
 
 					middleCardImage = ImageIO.read(this.getClass().getResourceAsStream("/gameCards/"+middleCard+".jpg"));
+					Image theResizedCardImageForMiddleCard =
+							middleCardImage.getScaledInstance(selectedCardLabel.getWidth(), selectedCardLabel.getHeight(),Image.SCALE_DEFAULT);
 
-				} catch (IOException e) {
+					ImageIcon theFlippedCardIcon = new ImageIcon(theResizedCardImageForMiddleCard);
+
+					selectedCardLabel.setIcon(theFlippedCardIcon);
+
+				} catch (Exception e) {
+					System.out.println("ERROR NO LEFT/RIGHT CARD ACCESS");
 
 				}
 
-				Image theResizedCardImageForMiddleCard =
-						middleCardImage.getScaledInstance(selectedCardLabel.getWidth(), selectedCardLabel.getHeight(),Image.SCALE_DEFAULT);
-
-				ImageIcon theFlippedCardIcon = new ImageIcon(theResizedCardImageForMiddleCard);
-
-				selectedCardLabel.setIcon(theFlippedCardIcon);
+				
 
 				BufferedImage topDiscardCardImage = null;
 
 				try {
 
 					topDiscardCardImage = ImageIO.read(this.getClass().getResourceAsStream("/gameCards/"+topDiscardCard+".jpg"));
+					Image theResizedCardImageFortopDiscard =
+							topDiscardCardImage.getScaledInstance(topDiscard.getWidth(), topDiscard.getHeight(),Image.SCALE_DEFAULT);
 
-				} catch (IOException e) {
+					ImageIcon topDiscardIcon = new ImageIcon(theResizedCardImageFortopDiscard);
 
+					topDiscard.setIcon(topDiscardIcon);
+
+				} catch (IOException e) {	
+					System.out.println("NO CARDS TO DISCARD");
 				}
 
-				Image theResizedCardImageFortopDiscard =
-						topDiscardCardImage.getScaledInstance(topDiscard.getWidth(), topDiscard.getHeight(),Image.SCALE_DEFAULT);
-
-				ImageIcon topDiscardIcon = new ImageIcon(theResizedCardImageFortopDiscard);
-
-				topDiscard.setIcon(topDiscardIcon);
+				
 
 			}
 			catch(IOException ex) {
 				ex.printStackTrace();
 			}
-
 		} else if (status == DRAW) { // PlayDraw
 
 			try {
