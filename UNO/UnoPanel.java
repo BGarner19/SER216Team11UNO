@@ -144,7 +144,7 @@ public class UnoPanel extends JFrame implements UnoConstants, Runnable {
        	otherPlayerhandSize = new JLabel("0");
 		otherPlayerhandSize.setForeground(Color.WHITE);
 		otherPlayerhandSize.setBounds(451, 102, 61, 16);
-		GameBoardPanel.add(otherPlayerhandSize);
+		gameBoardPanel.add(otherPlayerhandSize);
 
         // Buttons ===================================================
         btnGame = new JButton("Game");
@@ -196,7 +196,7 @@ public class UnoPanel extends JFrame implements UnoConstants, Runnable {
 			slider.setMaximum(4);
 			slider.setValue(2);
 			slider.setBounds(449, 489, 190, 29);
-			GameBoardPanel.add(slider);
+			gameBoardPanel.add(slider);
 
         topDiscard = new JLabel("");
         topDiscard.setBounds(109, 249, 165, 245);
