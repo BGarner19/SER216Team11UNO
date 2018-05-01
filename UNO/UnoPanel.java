@@ -433,38 +433,31 @@ public class UnoPanel extends JFrame implements UnoConstants, Runnable {
 
         //------------------------------------------------------------------------------------
 
-        slider.addChangeListener(new ChangeListener() {
-            @Override
-            public void stateChanged(ChangeEvent e) {
-                // should return the card in the hand @ that pos
-                String[] cardsInHand = playersHand.split(":");
-                currentSelectedCard = cardsInHand[slider.getValue()];
+	slider.addChangeListener(new ChangeListener() 
+		{
+			public void stateChanged(ChangeEvent e) 
+			{
+				try
+				{
+					String[] cardsInHand = playersHand.split(":"); 
+					currentSelectedCard = cardsInHand[slider.getValue()]; 
+					BufferedImage selectedCardImage = null; 	
+					selectedCardImage = ImageIO.read(this.getClass().getResourceAsStream("/gameCards/"+currentSelectedCard + ".jpg"));
+					
+					Image theResizedCardImageForSelectedCard = selectedCardImage.getScaledInstance( selectedCardLabel.getWidth(), selectedCardLabel.getHeight(), Image.SCALE_DEFAULT);
+					ImageIcon theSelectedCardIcon = new ImageIcon(theResizedCardImageForSelectedCard); 
+					selectedCardLabel.setIcon(theSelectedCardIcon);
+					
+				}
+				catch(Exception io)
+				{
+					System.out.print("WAITING FOR OTHER PLAYERS!!\n");
 
-                // print the current selected card
-                System.out.println(currentSelectedCard);
+				}
 
-                BufferedImage selectedCardImage = null;
-
-                try {
-
-                    selectedCardImage = ImageIO.read(this.getClass()
-                        .getResourceAsStream("/gameCards/" + currentSelectedCard + ".jpg"));
-
-                } catch (IOException e1) {
-                    System.out.println(e1.getMessage());
-                }
-
-                Image theResizedCardImageForSelectedCard =
-                    selectedCardImage.getScaledInstance(selectedCardLabel
-                            .getWidth(), selectedCardLabel
-                            .getHeight(),
-                        Image.SCALE_DEFAULT);
-
-                ImageIcon theSelectedCardIcon = new ImageIcon(theResizedCardImageForSelectedCard);
-
-                selectedCardLabel.setIcon(theSelectedCardIcon);
-            }
-        });
+			}
+		});
+		
 
 
     }
