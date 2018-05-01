@@ -24,6 +24,7 @@ import javax.swing.event.ChangeListener;
 
 public class UnoPanel extends JFrame implements UnoConstants, Runnable {
 
+<<<<<<< HEAD
     // Instantiate game variables
     public int handSize = 5;
     int player;
@@ -314,6 +315,340 @@ public class UnoPanel extends JFrame implements UnoConstants, Runnable {
                 } // End of close dialog code
             }
         });
+=======
+	// Instantiate game variables
+		public int handSize = 5;
+		int player;
+
+		// while playing variables
+		static boolean myTurn = false;
+		boolean waiting = true;
+		String currentSelectedCard; // should be in the form (color,value)
+		boolean continueToPlay = true;
+		boolean isValidPlay = false;
+		Thread thread;
+		public String colorChosen;
+		public String wildCardColor;
+
+		// Private
+		private DataOutputStream toServer;
+		private DataInputStream fromServer;
+		private String host = "localhost";
+		private int port = 8000;
+
+
+		// Jframe
+		private JPanel contentPane;
+
+
+		// Runtime variables
+		// Initiation variables
+		String opponentName;
+		int opponentCardCount;
+		String topDiscardCard;
+		String playersHand;
+		static boolean gameStarted = false;
+		private int status;
+		private int checkStatus;
+
+		/** had to make all these up here to manipulate in the functions */
+		// panels
+		JPanel GameBoardPanel;
+		JPanel GameMenuPanel;
+		JPanel HelpPanel;
+		JLabel otherPlayerName;
+		JLabel topDiscard;
+		JLabel GameMenuLabel;
+		JLabel otherPlayerhandSize;
+
+		// buttons
+		JButton btnGame;
+		JButton btnHelp;
+		JButton btnExit;
+		JButton drawButton;
+		JButton connect;
+		JButton play;
+		JButton btnPlaythiscard;
+
+		// slider
+		JSlider slider;
+
+		// Labels
+		JLabel leftCard;
+		JLabel rightCard;
+		JLabel selectedCardLabel;
+
+		// Start of Main ===============================================
+		public static void main(String[] args){
+			EventQueue.invokeLater(new Runnable() {
+				public void run() { // Start of run ====================
+					try {
+						UnoPanel frame = new UnoPanel();
+						frame.setVisible(true);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				} // End of run ========================================
+			});
+		} // End of main ===============================================
+
+
+	public UnoPanel() {
+		Init();
+	}
+
+	// Create the frame ============================================
+	public void Init() {
+
+		// Creates main window
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setBounds(100, 100, 1066, 618);
+		contentPane = new JPanel();
+		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+		setContentPane(contentPane);
+		contentPane.setLayout(null);
+
+		// Panels ====================================================
+
+		GameBoardPanel = new JPanel();
+		GameBoardPanel.setBackground(Color.LIGHT_GRAY);
+		GameBoardPanel.setBounds(0, 0, 1066, 618);
+		contentPane.add(GameBoardPanel);
+		GameBoardPanel.setLayout(null);
+
+		GameMenuPanel = new JPanel();
+		GameMenuPanel.setBackground(new Color(0, 255, 0));
+		GameMenuPanel.setForeground(new Color(0, 255, 0));
+		GameMenuPanel.setBounds(0, 0, 1066, 618);
+		contentPane.add(GameMenuPanel);
+		GameMenuPanel.setLayout(null);
+
+		otherPlayerName = new JLabel("No player has joined...");
+		otherPlayerName.setForeground(Color.WHITE);
+		otherPlayerName.setIcon(new ImageIcon(this.getClass().getResource("/UI/rsz_user.png")));
+		otherPlayerName.setBounds(419, 6, 201, 131);
+		GameBoardPanel.add(otherPlayerName);
+
+		// other player hand size
+		otherPlayerhandSize = new JLabel("0");
+		otherPlayerhandSize.setForeground(Color.WHITE);
+		otherPlayerhandSize.setBounds(451, 102, 61, 16);
+		GameBoardPanel.add(otherPlayerhandSize);
+
+		// Buttons ===================================================
+		btnGame = new JButton("Game");
+
+		// Main Screen Help
+		btnHelp = new JButton("Help");
+		btnHelp.setBounds(0, 47, 64, 38);
+		contentPane.add(btnHelp);
+
+	    // Main Screen Exit
+		btnExit = new JButton("Exit");
+		btnExit.setBounds(0, 90, 64, 38);
+		contentPane.add(btnExit);
+
+		// Game button
+		btnGame.setBounds(0, 6, 64, 38);
+		contentPane.add(btnGame);
+
+		drawButton = new JButton("Draw");
+		drawButton.setForeground(UIManager.getColor("Button.light"));
+		drawButton.setBackground(UIManager.getColor("Button.light"));
+		drawButton.setBounds(799, 249, 165, 245);
+		GameBoardPanel.add(drawButton);
+
+		connect = new JButton("Find a game");
+		connect.setBounds(389, 342, 287, 82);
+
+		play = new JButton("Play Game");
+		play.setBounds(389, 342, 287, 82);
+
+		// play this card button
+		btnPlaythiscard = new JButton("PlayThisCard");
+		btnPlaythiscard.setBounds(490, 530, 117, 29);
+		GameBoardPanel.add(btnPlaythiscard);
+
+		GameBoardPanel.setVisible(false);
+		// Add play button to GameMenuPanel
+		// GameMenuPanel.add(connect); // may take off
+		GameMenuPanel.add(play);
+		GameMenuPanel.setVisible(true);
+
+		// Slider =========================================
+		slider = new JSlider();
+		slider.setMinimum(0);
+		slider.setMaximum(4);
+		slider.setValue(2);
+		slider.setBounds(449, 489, 190, 29);
+		GameBoardPanel.add(slider);
+
+		topDiscard = new JLabel("");
+		topDiscard.setBounds(109, 249, 165, 245);
+		GameBoardPanel.add(topDiscard);
+
+		// Cards In Hand ======================================
+		selectedCardLabel = new JLabel("");
+		selectedCardLabel.setBounds(490, 249, 117, 190);
+		GameBoardPanel.add(selectedCardLabel);
+
+		leftCard = new JLabel("");
+		leftCard.setBounds(395, 275, 117, 190);
+		GameBoardPanel.add(leftCard);
+
+		rightCard = new JLabel("");
+		rightCard.setBounds(585, 275, 117, 190);
+		GameBoardPanel.add(rightCard);
+
+		HelpPanel = new JPanel();
+		HelpPanel.setForeground(Color.GREEN);
+		HelpPanel.setBackground(new Color(255, 69, 0));
+		HelpPanel.setBounds(0, 0, 1066, 618);
+		contentPane.add(HelpPanel);
+		HelpPanel.setVisible(false);
+
+											   //  =========       GAME HELP SCREEN BACKGROUND =========
+		HelpPanel.setOpaque(false);
+		JLabel helpBackground = new JLabel(new ImageIcon(this.getClass().getResource("/gameCards/HelpMenu.jpg")));
+		helpBackground.setBounds(0, 0, 1166, 596);
+		HelpPanel.add(helpBackground);
+
+		// ================================================== GUI BACKGROUNDS AND PICS ====================================
+
+												//	=========       GAME BACKGROUND    =================
+		JLabel gameBackground = new JLabel(new ImageIcon(this.getClass().getResource("/gameCards/Background.jpg")));
+		gameBackground.setBounds(0, 0, 1166, 596);
+		contentPane.add(gameBackground);
+
+											   //  ==========       MENU BACKFROUND    =================
+		GameMenuPanel.setOpaque(false);
+		JLabel menuBackground = new JLabel(new ImageIcon(this.getClass().getResource("/gameCards/GameMenu.jpg")));
+		menuBackground.setBounds(0, 0, 1166, 596);
+		GameMenuPanel.add(menuBackground);
+
+											   //  =========       GAME SCREEN CLEAR BACKGROUND ========
+		GameBoardPanel.setOpaque(false);
+
+										       //  =========        RIGHT & LEFT CARDS _ FACEDOWN ======
+
+		BufferedImage flippedCardImage = null;
+
+		try {
+
+			flippedCardImage = ImageIO.read(this.getClass().getResourceAsStream("/gameCards/FaceDown.png"));
+
+		} catch (IOException e) {
+
+		}
+
+		Image theResizedCardImageForFlippedCards =
+				flippedCardImage.getScaledInstance(selectedCardLabel.getWidth(), selectedCardLabel.getHeight(),Image.SCALE_DEFAULT);
+
+		ImageIcon theFlippedCardIcon = new ImageIcon(theResizedCardImageForFlippedCards);
+
+		leftCard.setIcon(theFlippedCardIcon);
+
+		rightCard.setIcon(theFlippedCardIcon);
+
+		                                   //  =========    DRAW BUTTON ==================
+		drawButton.setOpaque(false);
+		Image theResizedCardImageForDrawButton =
+				flippedCardImage.getScaledInstance(drawButton.getWidth(), drawButton.getHeight(),Image.SCALE_DEFAULT);
+
+		ImageIcon theDrawButtonIcon = new ImageIcon(theResizedCardImageForDrawButton);
+
+		drawButton.setIcon(theDrawButtonIcon);
+										 //  ==========    MIDDLE CARD INITIAL ICON ========
+		selectedCardLabel.setIcon(theFlippedCardIcon);
+										 //  ==========
+		topDiscard.setIcon(theFlippedCardIcon);
+
+
+
+// Action Listeners ============================================================================
+
+
+		// Action listener if user wants to exit
+		btnExit.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				// Close dialog code
+				JDialog.setDefaultLookAndFeelDecorated(true);
+			    int response = JOptionPane.showConfirmDialog(null, "Are you sure you want to exit?", "Exit game",
+			        JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+			    if (response == JOptionPane.NO_OPTION) {
+			      System.out.println("No button clicked");
+			    } else if (response == JOptionPane.YES_OPTION) {
+			    	System.exit(0);
+			    	try {
+			    		toServer.writeBoolean(false);
+			    		toServer.flush();
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					}
+			    } else if (response == JOptionPane.CLOSED_OPTION) {
+			      System.out.println("JOptionPane closed");
+			    } // End of close dialog code
+			}
+		});
+
+
+//------------------------------------------------------------------------------------
+
+
+		btnGame.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+
+				HelpPanel.setVisible(false); //panel_1 is red
+
+				if(gameStarted){
+					GameMenuPanel.setVisible(false);
+					GameBoardPanel.setVisible(true); // panel_2 is blue
+				}else{
+					GameMenuPanel.setVisible(true); // panel is green
+					GameBoardPanel.setVisible(false);
+				}
+			}
+		});
+
+
+//------------------------------------------------------------------------------------
+
+
+		btnPlaythiscard.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent e) {
+
+				// check to make sure its a valid play
+				validatePlay(currentSelectedCard, topDiscardCard);
+
+				// client wants to play this card and its valid
+				if (isValidPlay) {
+					status = PLAYCARD;
+					waiting = false;
+
+				} else { // Invalid Card Error dialog
+
+					String [] e1 = topDiscardCard.split(",");
+					String eColor = e1[0];
+					String eVal = e1[1];
+					if (eVal.equals("wild")){
+						JOptionPane.showMessageDialog(null,
+						    "Please play a card that's " + eColor,
+						    "Invalid Card",
+						    JOptionPane.ERROR_MESSAGE);
+					} else {
+					JOptionPane.showMessageDialog(null,
+					    "Please play a card that's either " + eColor +" Or is " + eVal,
+					    "Invalid Card",
+					    JOptionPane.ERROR_MESSAGE);
+					}
+
+				}
+
+				isValidPlay = false;
+			}
+		});
+>>>>>>> origin/US1_ProperCardCount
 
 
         //------------------------------------------------------------------------------------
@@ -389,9 +724,20 @@ public class UnoPanel extends JFrame implements UnoConstants, Runnable {
         //------------------------------------------------------------------------------------
 
 
+<<<<<<< HEAD
         // play goes to the panel with the game
         play.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+=======
+		slider.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+
+                    try {
+					// should return the card in the hand @ that pos
+					String [] cardsInHand = playersHand.split(":");
+					currentSelectedCard = cardsInHand[slider.getValue()];
+>>>>>>> origin/US1_ProperCardCount
 
                 // brings up the game panel
                 gameStarted = true;
@@ -402,6 +748,7 @@ public class UnoPanel extends JFrame implements UnoConstants, Runnable {
 
                 connectToServer();
 
+<<<<<<< HEAD
             }
         });
 
@@ -421,6 +768,25 @@ public class UnoPanel extends JFrame implements UnoConstants, Runnable {
             }
         });
 
+=======
+
+
+                    selectedCardImage = ImageIO.read(this.getClass().getResourceAsStream("/gameCards/"+currentSelectedCard+".jpg"));
+
+                    Image theResizedCardImageForSelectedCard =
+                        selectedCardImage.getScaledInstance(selectedCardLabel.getWidth(), selectedCardLabel.getHeight(),Image.SCALE_DEFAULT);
+
+                    ImageIcon theSelectedCardIcon = new ImageIcon(theResizedCardImageForSelectedCard);
+
+                    selectedCardLabel.setIcon(theSelectedCardIcon);
+					} catch (Exception e1) {
+                        System.out.print("WAITING FOR OTHER PLAYER!!\n");
+					}
+
+
+				}
+		    });
+>>>>>>> origin/US1_ProperCardCount
 
         //------------------------------------------------------------------------------------
 
