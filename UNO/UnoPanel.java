@@ -431,6 +431,8 @@ public class UnoPanel extends JFrame implements UnoConstants, Runnable {
 		slider.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
+
+                    try {
 					// should return the card in the hand @ that pos
 					String [] cardsInHand = playersHand.split(":");
 					currentSelectedCard = cardsInHand[slider.getValue()];
@@ -440,20 +442,21 @@ public class UnoPanel extends JFrame implements UnoConstants, Runnable {
 
 					BufferedImage selectedCardImage = null;
 
-					try {
+					
 
-						selectedCardImage = ImageIO.read(this.getClass().getResourceAsStream("/gameCards/"+currentSelectedCard+".jpg"));
+                    selectedCardImage = ImageIO.read(this.getClass().getResourceAsStream("/gameCards/"+currentSelectedCard+".jpg"));
 
-					} catch (IOException e1) {
+                    Image theResizedCardImageForSelectedCard =
+                        selectedCardImage.getScaledInstance(selectedCardLabel.getWidth(), selectedCardLabel.getHeight(),Image.SCALE_DEFAULT);
 
+                    ImageIcon theSelectedCardIcon = new ImageIcon(theResizedCardImageForSelectedCard);
+
+                    selectedCardLabel.setIcon(theSelectedCardIcon);
+					} catch (Exception e1) {
+                        System.out.print("WAITING FOR OTHER PLAYER!!\n");
 					}
 
-					Image theResizedCardImageForSelectedCard =
-							selectedCardImage.getScaledInstance(selectedCardLabel.getWidth(), selectedCardLabel.getHeight(),Image.SCALE_DEFAULT);
 
-					ImageIcon theSelectedCardIcon = new ImageIcon(theResizedCardImageForSelectedCard);
-
-					selectedCardLabel.setIcon(theSelectedCardIcon);
 				}
 		    });
 
